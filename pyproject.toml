@@ -33,6 +33,9 @@ phishlens = { workspace = true }
 [tool.ruff]
 target-version = "py312"
 line-length = 100
+# Where first-party code lives, so imports of phishlens and tests are sorted
+# into their own group.
+src = ["engine"]
 
 [tool.ruff.lint]
 select = [
