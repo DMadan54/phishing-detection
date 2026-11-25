@@ -1,0 +1,20 @@
+# Store text files with LF line endings and check them out with LF on every
+# platform, overriding core.autocrlf, so diffs and tools behave the same on
+# Windows, macOS and Linux.
+* text=auto eol=lf
+
+# Git hooks run under sh, which fails on CRLF ("bad interpreter").
+.githooks/* text eol=lf
+
+# Raw emails are kept byte for byte. They use CRLF line endings, and DKIM
+# signs a hash of the exact bytes, so converting line endings would break a
+# valid signature and make a legitimate fixture look forged.
+*.eml -text
+
+# Images are binary: no line-ending conversion and no text diffs.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.webp binary
