@@ -1,0 +1,38 @@
+#!/bin/sh
+#
+# commit-msg hook: reject commit messages that contain AI attribution.
+#
+# Git runs this after the message is written and before the commit is saved,
+# passing the path of the message file as $1. Exiting non-zero aborts the
+# commit. Enable it once per clone with:
+#
+#     git config core.hooksPath .githooks
+#
+# This is a local guardrail, not a security control: anyone can skip it with
+# --no-verify, so never do that. Fix the message instead.
+
+msg_file="$1"
+
+# Case-insensitive extended regex. Dots are escaped so "claude.ai" does not
+# also match "claudexai".
+pattern='co-authored-by|generated with|claude-session|claude\.ai|anthropic\.com'
+
+# Only check the part of the file git will actually keep:
+#   - stop at the scissors line that `git commit -v` puts above the diff,
+#     otherwise a staged file that mentions these words would block the commit
+#   - skip comment lines, which git strips after this hook runs
+# Each kept line is prefixed with its line number in the file.
+matches=$(awk '
+    /^# -+ >8 -+/ { exit }
+    /^#/          { next }
+                  { print NR ": " $0 }
+' "$msg_file" | grep -i -E "$pattern")
+
+if [ -n "$matches" ]; then
+    echo "commit-msg: commit rejected, the message contains AI attribution:" >&2
+    echo "$matches" | sed 's/^/  line /' >&2
+    echo "Remove these lines and commit again (do not use --no-verify)." >&2
+    exit 1
+fi
+
+exit 0
