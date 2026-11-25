@@ -1,0 +1,77 @@
+# Workspace root. This file is not a package: it ties the Python parts of the
+# repository together (one lockfile, one set of dev tools and lint rules) and
+# is what `uv run ...` finds when run from the repository root.
+#
+# The engine package itself is defined in engine/pyproject.toml, so its
+# runtime dependencies stay separate from the tools used to develop it.
+
+[project]
+name = "phishlens-workspace"
+version = "0.0.0"
+requires-python = ">=3.12"
+dependencies = ["phishlens"]
+
+[dependency-groups]
+dev = [
+    "mypy>=1.13",
+    "pytest>=8.3",
+    "pytest-asyncio>=0.24",
+    "ruff>=0.8",
+]
+
+[tool.uv]
+package = false
+
+[tool.uv.workspace]
+members = ["engine"]
+
+[tool.uv.sources]
+phishlens = { workspace = true }
+
+# --- ruff ------------------------------------------------------------------
+
+[tool.ruff]
+target-version = "py312"
+line-length = 100
+
+[tool.ruff.lint]
+select = [
+    "E",    # pycodestyle errors
+    "W",    # pycodestyle warnings
+    "F",    # pyflakes: unused names, undefined names
+    "I",    # import sorting
+    "B",    # bugbear: likely bugs
+    "UP",   # modern Python syntax
+    "SIM",  # simplifications
+    "S",    # bandit: security problems (eval, shell=True, weak hashes ...)
+    "RUF",  # ruff's own rules
+]
+
+[tool.ruff.lint.per-file-ignores]
+# Tests use plain assert, which bandit flags because asserts vanish under -O.
+"engine/tests/**" = ["S101"]
+
+# --- mypy ------------------------------------------------------------------
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+plugins = ["pydantic.mypy"]
+mypy_path = "engine"
+explicit_package_bases = true
+
+[tool.pydantic-mypy]
+init_forbid_extra = true
+init_typed = true
+warn_required_dynamic_aliases = true
+
+# --- pytest ----------------------------------------------------------------
+
+[tool.pytest.ini_options]
+testpaths = ["engine/tests"]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
+markers = [
+    "live: talks to the real network; skipped unless selected with -m live",
+]
+addopts = ["-m", "not live", "--strict-markers"]
