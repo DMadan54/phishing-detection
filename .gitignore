@@ -1,0 +1,83 @@
+# ---------------------------------------------------------------------------
+# Python
+# ---------------------------------------------------------------------------
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.mypy_cache/
+.ruff_cache/
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+coverage.xml
+build/
+dist/
+*.egg-info/
+
+# ---------------------------------------------------------------------------
+# Node (web app and browser extension)
+# ---------------------------------------------------------------------------
+node_modules/
+web/dist/
+extension/dist/
+extension/*.zip
+extension/*.xpi
+extension/web-ext-artifacts/
+
+# ---------------------------------------------------------------------------
+# Secrets: API keys and certificates come from the environment, never Git.
+# .env.example documents the variables and is the only .env file committed.
+# ---------------------------------------------------------------------------
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+.claude/settings.local.json
+
+# ---------------------------------------------------------------------------
+# Playwright (sandbox worker and end-to-end tests)
+# ---------------------------------------------------------------------------
+playwright-report/
+test-results/
+blob-report/
+playwright/.cache/
+
+# ---------------------------------------------------------------------------
+# Editors and operating systems
+# ---------------------------------------------------------------------------
+.vscode/*
+!.vscode/extensions.json
+.idea/
+*.swp
+*~
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ---------------------------------------------------------------------------
+# Data that must never be committed
+#
+# Real emails contain other people's names, addresses and conversations, so
+# committing one leaks personal data that cannot be taken back out of Git
+# history. Live phishing samples contain working malicious links and
+# attachments: publishing them spreads them, can trip GitHub's and antivirus
+# scanners, and breaks the project rule that fixtures are hand-made or public.
+#
+# So every .eml and .msg file is ignored, except the synthetic fixtures under
+# engine/tests/fixtures/ (which use reserved domains such as example.com).
+# The negation works because the fixture folders themselves are not ignored.
+# ---------------------------------------------------------------------------
+*.eml
+*.msg
+!engine/tests/fixtures/**/*.eml
+
+# Collected datasets, fetch caches, sandbox screenshots and per-run results
+# of the evaluation. Only the frozen test set definition and summary results
+# are committed.
+eval/data/raw/
+eval/data/cache/
+eval/data/screenshots/
+eval/results/runs/
