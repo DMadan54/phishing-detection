@@ -1,0 +1,42 @@
+{
+  "_comment": "TLDs that are heavily over-represented in phishing relative to their size. A suspicious TLD is weak evidence on its own (LOW severity): most sites on these TLDs are legitimate.",
+  "_sources": [
+    "Spamhaus Project, 'The most abused top-level domains' (spamhaus.org/reputation-statistics/cctlds/domains/), consulted for this list",
+    "Interisle Consulting Group, 'Phishing Landscape' annual reports (interisle.net), TLD tables",
+    "zip and mov are included because they look like file extensions in link text"
+  ],
+  "_compiled": "2026-11-26 from the sources above; re-check against their current editions before relying on it",
+  "tlds": [
+    "bond",
+    "buzz",
+    "cf",
+    "cfd",
+    "click",
+    "country",
+    "cyou",
+    "fun",
+    "ga",
+    "gq",
+    "help",
+    "icu",
+    "link",
+    "live",
+    "loan",
+    "lol",
+    "ml",
+    "monster",
+    "mov",
+    "online",
+    "quest",
+    "rest",
+    "sbs",
+    "shop",
+    "site",
+    "support",
+    "tk",
+    "top",
+    "work",
+    "xyz",
+    "zip"
+  ]
+}

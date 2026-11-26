@@ -1,14 +1,38 @@
 {
-  "_comment": "Brands that phishing often impersonates. keywords are matched as whole words, case-insensitively, in display names and link text. domains are the brand's own domains; their subdomains count as the brand's too. Used by the engine and the extension.",
+  "_comment": "Brands that phishing often impersonates. keywords: matched as whole words, case-insensitively, in display names, link text and URL hostnames and paths. labels: the registered names that lookalike detection compares against (empty for names too short or generic to compare safely). domains: the brand's own registrable domains; their subdomains count as the brand's too. Used by the engine and the extension.",
   "brands": [
     {
       "name": "PayPal",
-      "keywords": ["paypal"],
-      "domains": ["paypal.com", "paypal.me", "paypalobjects.com"]
+      "keywords": [
+        "paypal"
+      ],
+      "labels": [
+        "paypal"
+      ],
+      "domains": [
+        "paypal.com",
+        "paypal.me",
+        "paypalobjects.com"
+      ]
     },
     {
       "name": "Microsoft",
-      "keywords": ["microsoft", "office 365", "microsoft 365", "onedrive", "sharepoint"],
+      "keywords": [
+        "microsoft",
+        "office 365",
+        "microsoft 365",
+        "onedrive",
+        "sharepoint"
+      ],
+      "labels": [
+        "microsoft",
+        "microsoftonline",
+        "office365",
+        "onedrive",
+        "sharepoint",
+        "outlook",
+        "hotmail"
+      ],
       "domains": [
         "microsoft.com",
         "microsoftonline.com",
@@ -17,56 +41,783 @@
         "outlook.com",
         "live.com",
         "sharepoint.com",
-        "onedrive.com"
+        "onedrive.com",
+        "windows.net",
+        "azure.com",
+        "msn.com",
+        "hotmail.com",
+        "bing.com",
+        "skype.com",
+        "xbox.com"
       ]
     },
     {
       "name": "Apple",
-      "keywords": ["apple", "icloud", "itunes"],
-      "domains": ["apple.com", "icloud.com", "me.com"]
+      "keywords": [
+        "apple",
+        "icloud",
+        "itunes"
+      ],
+      "labels": [
+        "apple",
+        "icloud",
+        "itunes"
+      ],
+      "domains": [
+        "apple.com",
+        "icloud.com",
+        "me.com",
+        "mzstatic.com"
+      ]
     },
     {
       "name": "Google",
-      "keywords": ["google", "gmail"],
-      "domains": ["google.com", "gmail.com", "googlemail.com", "accounts.google.com"]
+      "keywords": [
+        "google",
+        "gmail"
+      ],
+      "labels": [
+        "google",
+        "gmail",
+        "googlemail"
+      ],
+      "domains": [
+        "google.com",
+        "google.co.uk",
+        "gmail.com",
+        "googlemail.com",
+        "youtube.com",
+        "gstatic.com",
+        "googleusercontent.com"
+      ]
     },
     {
       "name": "Amazon",
-      "keywords": ["amazon"],
+      "keywords": [
+        "amazon"
+      ],
+      "labels": [
+        "amazon",
+        "amazonaws"
+      ],
       "domains": [
         "amazon.com",
         "amazon.co.uk",
         "amazon.de",
         "amazon.fr",
+        "amazon.it",
+        "amazon.es",
+        "amazon.ca",
         "amazon.in",
+        "amazon.co.jp",
+        "amazon.com.au",
         "amazonaws.com",
         "amazonses.com"
       ]
     },
     {
-      "name": "DHL",
-      "keywords": ["dhl"],
-      "domains": ["dhl.com", "dhl.de", "dhl.co.uk"]
+      "name": "Facebook",
+      "keywords": [
+        "facebook"
+      ],
+      "labels": [
+        "facebook"
+      ],
+      "domains": [
+        "facebook.com",
+        "fb.com",
+        "meta.com",
+        "messenger.com",
+        "fbcdn.net"
+      ]
     },
     {
-      "name": "Royal Mail",
-      "keywords": ["royal mail"],
-      "domains": ["royalmail.com", "royalmail.co.uk"]
+      "name": "Instagram",
+      "keywords": [
+        "instagram"
+      ],
+      "labels": [
+        "instagram"
+      ],
+      "domains": [
+        "instagram.com",
+        "cdninstagram.com"
+      ]
+    },
+    {
+      "name": "WhatsApp",
+      "keywords": [
+        "whatsapp"
+      ],
+      "labels": [
+        "whatsapp"
+      ],
+      "domains": [
+        "whatsapp.com",
+        "whatsapp.net",
+        "wa.me"
+      ]
     },
     {
       "name": "Netflix",
-      "keywords": ["netflix"],
-      "domains": ["netflix.com"]
+      "keywords": [
+        "netflix"
+      ],
+      "labels": [
+        "netflix"
+      ],
+      "domains": [
+        "netflix.com"
+      ]
+    },
+    {
+      "name": "LinkedIn",
+      "keywords": [
+        "linkedin"
+      ],
+      "labels": [
+        "linkedin"
+      ],
+      "domains": [
+        "linkedin.com",
+        "licdn.com",
+        "lnkd.in"
+      ]
+    },
+    {
+      "name": "X (Twitter)",
+      "keywords": [
+        "twitter"
+      ],
+      "labels": [
+        "twitter"
+      ],
+      "domains": [
+        "twitter.com",
+        "x.com",
+        "t.co"
+      ]
+    },
+    {
+      "name": "DHL",
+      "keywords": [
+        "dhl"
+      ],
+      "labels": [
+        "dhl"
+      ],
+      "domains": [
+        "dhl.com",
+        "dhl.de",
+        "dhl.co.uk"
+      ]
+    },
+    {
+      "name": "FedEx",
+      "keywords": [
+        "fedex"
+      ],
+      "labels": [
+        "fedex"
+      ],
+      "domains": [
+        "fedex.com"
+      ]
+    },
+    {
+      "name": "UPS",
+      "keywords": [
+        "ups"
+      ],
+      "labels": [],
+      "domains": [
+        "ups.com"
+      ]
+    },
+    {
+      "name": "USPS",
+      "keywords": [
+        "usps"
+      ],
+      "labels": [
+        "usps"
+      ],
+      "domains": [
+        "usps.com"
+      ]
+    },
+    {
+      "name": "Royal Mail",
+      "keywords": [
+        "royal mail",
+        "royalmail"
+      ],
+      "labels": [
+        "royalmail"
+      ],
+      "domains": [
+        "royalmail.com",
+        "royalmail.co.uk"
+      ]
+    },
+    {
+      "name": "DPD",
+      "keywords": [
+        "dpd"
+      ],
+      "labels": [],
+      "domains": [
+        "dpd.co.uk",
+        "dpd.com",
+        "dpdlocal.co.uk"
+      ]
+    },
+    {
+      "name": "Evri",
+      "keywords": [
+        "evri"
+      ],
+      "labels": [
+        "evri"
+      ],
+      "domains": [
+        "evri.com"
+      ]
     },
     {
       "name": "HMRC",
-      "keywords": ["hmrc"],
-      "domains": ["hmrc.gov.uk", "gov.uk"]
+      "keywords": [
+        "hmrc"
+      ],
+      "labels": [
+        "hmrc"
+      ],
+      "domains": [
+        "hmrc.gov.uk",
+        "gov.uk"
+      ]
+    },
+    {
+      "name": "IRS",
+      "keywords": [
+        "irs"
+      ],
+      "labels": [],
+      "domains": [
+        "irs.gov"
+      ]
     },
     {
       "name": "DocuSign",
-      "keywords": ["docusign"],
-      "domains": ["docusign.com", "docusign.net"]
+      "keywords": [
+        "docusign"
+      ],
+      "labels": [
+        "docusign"
+      ],
+      "domains": [
+        "docusign.com",
+        "docusign.net"
+      ]
+    },
+    {
+      "name": "Dropbox",
+      "keywords": [
+        "dropbox"
+      ],
+      "labels": [
+        "dropbox"
+      ],
+      "domains": [
+        "dropbox.com",
+        "dropboxusercontent.com"
+      ]
+    },
+    {
+      "name": "Adobe",
+      "keywords": [
+        "adobe"
+      ],
+      "labels": [
+        "adobe"
+      ],
+      "domains": [
+        "adobe.com",
+        "adobesign.com"
+      ]
+    },
+    {
+      "name": "Yahoo",
+      "keywords": [
+        "yahoo"
+      ],
+      "labels": [
+        "yahoo"
+      ],
+      "domains": [
+        "yahoo.com",
+        "yahoo.co.uk",
+        "yimg.com"
+      ]
+    },
+    {
+      "name": "AOL",
+      "keywords": [
+        "aol"
+      ],
+      "labels": [],
+      "domains": [
+        "aol.com"
+      ]
+    },
+    {
+      "name": "Coinbase",
+      "keywords": [
+        "coinbase"
+      ],
+      "labels": [
+        "coinbase"
+      ],
+      "domains": [
+        "coinbase.com"
+      ]
+    },
+    {
+      "name": "Binance",
+      "keywords": [
+        "binance"
+      ],
+      "labels": [
+        "binance"
+      ],
+      "domains": [
+        "binance.com"
+      ]
+    },
+    {
+      "name": "Kraken",
+      "keywords": [
+        "kraken"
+      ],
+      "labels": [
+        "kraken"
+      ],
+      "domains": [
+        "kraken.com"
+      ]
+    },
+    {
+      "name": "MetaMask",
+      "keywords": [
+        "metamask"
+      ],
+      "labels": [
+        "metamask"
+      ],
+      "domains": [
+        "metamask.io"
+      ]
+    },
+    {
+      "name": "Steam",
+      "keywords": [
+        "steamcommunity",
+        "steampowered"
+      ],
+      "labels": [
+        "steamcommunity",
+        "steampowered"
+      ],
+      "domains": [
+        "steampowered.com",
+        "steamcommunity.com"
+      ]
+    },
+    {
+      "name": "Roblox",
+      "keywords": [
+        "roblox"
+      ],
+      "labels": [
+        "roblox"
+      ],
+      "domains": [
+        "roblox.com"
+      ]
+    },
+    {
+      "name": "Epic Games",
+      "keywords": [
+        "epic games",
+        "epicgames"
+      ],
+      "labels": [
+        "epicgames"
+      ],
+      "domains": [
+        "epicgames.com"
+      ]
+    },
+    {
+      "name": "Spotify",
+      "keywords": [
+        "spotify"
+      ],
+      "labels": [
+        "spotify"
+      ],
+      "domains": [
+        "spotify.com"
+      ]
+    },
+    {
+      "name": "eBay",
+      "keywords": [
+        "ebay"
+      ],
+      "labels": [
+        "ebay"
+      ],
+      "domains": [
+        "ebay.com",
+        "ebay.co.uk"
+      ]
+    },
+    {
+      "name": "Walmart",
+      "keywords": [
+        "walmart"
+      ],
+      "labels": [
+        "walmart"
+      ],
+      "domains": [
+        "walmart.com"
+      ]
+    },
+    {
+      "name": "Chase",
+      "keywords": [
+        "chase bank",
+        "jpmorgan"
+      ],
+      "labels": [
+        "jpmorgan",
+        "chasebank"
+      ],
+      "domains": [
+        "chase.com",
+        "jpmorgan.com",
+        "jpmorganchase.com"
+      ]
+    },
+    {
+      "name": "Bank of America",
+      "keywords": [
+        "bank of america",
+        "bankofamerica"
+      ],
+      "labels": [
+        "bankofamerica"
+      ],
+      "domains": [
+        "bankofamerica.com",
+        "bofa.com"
+      ]
+    },
+    {
+      "name": "Wells Fargo",
+      "keywords": [
+        "wells fargo",
+        "wellsfargo"
+      ],
+      "labels": [
+        "wellsfargo"
+      ],
+      "domains": [
+        "wellsfargo.com",
+        "wf.com"
+      ]
+    },
+    {
+      "name": "Citi",
+      "keywords": [
+        "citibank"
+      ],
+      "labels": [
+        "citibank"
+      ],
+      "domains": [
+        "citi.com",
+        "citibank.com"
+      ]
+    },
+    {
+      "name": "HSBC",
+      "keywords": [
+        "hsbc"
+      ],
+      "labels": [
+        "hsbc"
+      ],
+      "domains": [
+        "hsbc.com",
+        "hsbc.co.uk"
+      ]
+    },
+    {
+      "name": "Barclays",
+      "keywords": [
+        "barclays",
+        "barclaycard"
+      ],
+      "labels": [
+        "barclays",
+        "barclaycard"
+      ],
+      "domains": [
+        "barclays.co.uk",
+        "barclays.com",
+        "barclaycard.co.uk"
+      ]
+    },
+    {
+      "name": "Lloyds Bank",
+      "keywords": [
+        "lloyds bank",
+        "lloydsbank"
+      ],
+      "labels": [
+        "lloydsbank"
+      ],
+      "domains": [
+        "lloydsbank.com",
+        "lloydsbank.co.uk"
+      ]
+    },
+    {
+      "name": "NatWest",
+      "keywords": [
+        "natwest"
+      ],
+      "labels": [
+        "natwest"
+      ],
+      "domains": [
+        "natwest.com"
+      ]
+    },
+    {
+      "name": "Santander",
+      "keywords": [
+        "santander"
+      ],
+      "labels": [
+        "santander"
+      ],
+      "domains": [
+        "santander.co.uk",
+        "santander.com"
+      ]
+    },
+    {
+      "name": "Monzo",
+      "keywords": [
+        "monzo"
+      ],
+      "labels": [
+        "monzo"
+      ],
+      "domains": [
+        "monzo.com"
+      ]
+    },
+    {
+      "name": "Revolut",
+      "keywords": [
+        "revolut"
+      ],
+      "labels": [
+        "revolut"
+      ],
+      "domains": [
+        "revolut.com"
+      ]
+    },
+    {
+      "name": "American Express",
+      "keywords": [
+        "american express",
+        "amex"
+      ],
+      "labels": [
+        "americanexpress"
+      ],
+      "domains": [
+        "americanexpress.com",
+        "aexp.com"
+      ]
+    },
+    {
+      "name": "Booking.com",
+      "keywords": [
+        "booking.com"
+      ],
+      "labels": [],
+      "domains": [
+        "booking.com"
+      ]
+    },
+    {
+      "name": "Airbnb",
+      "keywords": [
+        "airbnb"
+      ],
+      "labels": [
+        "airbnb"
+      ],
+      "domains": [
+        "airbnb.com",
+        "airbnb.co.uk"
+      ]
+    },
+    {
+      "name": "Zoom",
+      "keywords": [
+        "zoom meeting",
+        "zoom.us"
+      ],
+      "labels": [],
+      "domains": [
+        "zoom.us",
+        "zoom.com"
+      ]
+    },
+    {
+      "name": "Slack",
+      "keywords": [
+        "slack"
+      ],
+      "labels": [
+        "slack"
+      ],
+      "domains": [
+        "slack.com"
+      ]
+    },
+    {
+      "name": "GitHub",
+      "keywords": [
+        "github"
+      ],
+      "labels": [
+        "github"
+      ],
+      "domains": [
+        "github.com",
+        "githubusercontent.com"
+      ]
+    },
+    {
+      "name": "Okta",
+      "keywords": [
+        "okta"
+      ],
+      "labels": [],
+      "domains": [
+        "okta.com",
+        "oktacdn.com"
+      ]
+    },
+    {
+      "name": "Telegram",
+      "keywords": [
+        "telegram"
+      ],
+      "labels": [
+        "telegram"
+      ],
+      "domains": [
+        "telegram.org",
+        "t.me"
+      ]
+    },
+    {
+      "name": "TikTok",
+      "keywords": [
+        "tiktok"
+      ],
+      "labels": [
+        "tiktok"
+      ],
+      "domains": [
+        "tiktok.com"
+      ]
+    },
+    {
+      "name": "Discord",
+      "keywords": [
+        "discord"
+      ],
+      "labels": [
+        "discord"
+      ],
+      "domains": [
+        "discord.com",
+        "discord.gg",
+        "discordapp.com"
+      ]
+    },
+    {
+      "name": "Venmo",
+      "keywords": [
+        "venmo"
+      ],
+      "labels": [
+        "venmo"
+      ],
+      "domains": [
+        "venmo.com"
+      ]
+    },
+    {
+      "name": "Cash App",
+      "keywords": [
+        "cash app",
+        "cashapp"
+      ],
+      "labels": [
+        "cashapp"
+      ],
+      "domains": [
+        "cash.app"
+      ]
+    },
+    {
+      "name": "Norton",
+      "keywords": [
+        "norton antivirus",
+        "norton 360",
+        "nortonlifelock"
+      ],
+      "labels": [
+        "nortonlifelock"
+      ],
+      "domains": [
+        "norton.com"
+      ]
+    },
+    {
+      "name": "McAfee",
+      "keywords": [
+        "mcafee"
+      ],
+      "labels": [
+        "mcafee"
+      ],
+      "domains": [
+        "mcafee.com"
+      ]
     }
   ]
 }

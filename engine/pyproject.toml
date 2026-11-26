@@ -32,3 +32,4 @@ packages = ["phishlens"]
 [tool.hatch.build.targets.wheel.force-include]
 "../shared/brands.json" = "phishlens/data/brands.json"
 "../shared/shorteners.json" = "phishlens/data/shorteners.json"
+"../shared/suspicious-tlds.json" = "phishlens/data/suspicious-tlds.json"

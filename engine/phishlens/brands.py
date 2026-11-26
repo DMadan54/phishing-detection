@@ -19,6 +19,7 @@ from phishlens.domains import normalise_domain
 class Brand:
     name: str
     keywords: tuple[str, ...]
+    labels: tuple[str, ...]  # registered names lookalike detection compares against
     domains: frozenset[str]
 
     def owns(self, domain: str) -> bool:
@@ -31,7 +32,8 @@ class Brand:
         return any(domain == d or domain.endswith("." + d) for d in self.domains)
 
 
-def _read_shared(name: str) -> Any:
+def read_shared(name: str) -> Any:
+    """Load a JSON file from shared/ (or the copy packaged in a wheel)."""
     repo_copy = Path(__file__).resolve().parents[2] / "shared" / name
     if repo_copy.is_file():
         return json.loads(repo_copy.read_text(encoding="utf-8"))
@@ -45,15 +47,16 @@ def load_brands() -> tuple[Brand, ...]:
         Brand(
             name=entry["name"],
             keywords=tuple(k.lower() for k in entry["keywords"]),
+            labels=tuple(label.lower() for label in entry.get("labels", [])),
             domains=frozenset(d for d in map(normalise_domain, entry["domains"]) if d),
         )
-        for entry in _read_shared("brands.json")["brands"]
+        for entry in read_shared("brands.json")["brands"]
     )
 
 
 @cache
 def load_shorteners() -> frozenset[str]:
-    return frozenset(h.lower() for h in _read_shared("shorteners.json")["hosts"])
+    return frozenset(h.lower() for h in read_shared("shorteners.json")["hosts"])
 
 
 @cache
@@ -70,6 +73,26 @@ def brands_named_in(text: str) -> list[tuple[Brand, re.Match[str]]]:
             match = _keyword_pattern(keyword).search(text)
             if match:
                 found.append((brand, match))
+                break
+    return found
+
+
+def brands_in_token_text(text: str) -> list[Brand]:
+    """Brands named in a hostname or path, where words run together.
+
+    "login-paypal" and "paypal.com.secure" both name PayPal. Keywords with
+    spaces are compared with the spaces removed ("royal mail" -> "royalmail").
+    """
+    tokens = set(re.split(r"[^a-z0-9]+", text.lower()))
+    joined = re.sub(r"[^a-z0-9]+", "", text.lower())
+    found = []
+    for brand in load_brands():
+        for keyword in brand.keywords:
+            compact = re.sub(r"[^a-z0-9]+", "", keyword)
+            # Short keywords must be a whole token ("ups" not "backups");
+            # long ones may be joined to other words ("paypalsecure").
+            if compact in tokens or (len(compact) >= 6 and compact in joined):
+                found.append(brand)
                 break
     return found
 

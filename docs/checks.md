@@ -60,3 +60,23 @@ drop one step when the message has a `List-Id` header and a valid ARC chain.
 | `email.attachments.type_mismatch` | MEDIUM, HIGH if it's really a program | The bytes don't match the file's extension or declared type (`report.pdf` that is a zip). Generic `application/octet-stream` declarations are ignored. | A disguised file is trying to get past a person or a filter. | Mislabelled files from badly written software; unusual formats the sniffer doesn't know. |
 | `email.language.urgency` | LOW | Phrases such as "account has been suspended", "within 24 hours", "payment failed", "urgent". | Pressure stops people thinking. Supporting evidence only. | Genuine reminders, deadlines and security notices. |
 | `email.language.credential_request` | LOW | Phrases such as "verify your account", "confirm your password", "enter your card details". | Phishing asks for exactly these. Supporting evidence only. | Genuine account-security mail and sign-up confirmations. |
+
+## URL: lexical
+
+These read only the URL text, parsed with the WHATWG URL Standard (the rules browsers use), so `https://evil.example\@paypal.com` is read as going to `evil.example`, as a browser would.
+
+| Finding id | Severity | What it means | Why it matters | Known false positives |
+|------------|----------|---------------|----------------|-----------------------|
+| `url.parse.invalid` | MEDIUM | The text can't be parsed as a URL by the browser rules. | Broken URLs confuse filters while still working in some programs. | Typos and truncated links pasted by people. |
+| `url.scheme.dangerous` | HIGH | `javascript:`, `data:`, `vbscript:` or `file:`. | Runs script or opens embedded content instead of a website. | Practically none in links sent to people. |
+| `url.host.ip_literal` | MEDIUM | The host is an IP address, in any spelling browsers accept (`2130706433`, `0x7f.1`, `[::1]`). | No domain name to recognise or hold anyone to account. | Device admin pages and internal tools. |
+| `url.host.percent_encoded` | MEDIUM | The host is written with %-codes (`%70aypal.com`). | Unreadable to people and naive filters; browsers decode it. | Almost none. |
+| `url.host.deep_subdomains` | LOW | More than 4 labels in front of the registrable domain. | Pushes the real domain out of view. | CDNs and some cloud services use deep names. |
+| `url.host.long` | LOW | Host longer than 60 characters. | Hides the part that matters. | Cloud storage and CDN hostnames. |
+| `url.host.high_entropy` | LOW | The registrable label is 12+ characters with 3.5+ bits per character of Shannon entropy. | Looks machine-generated (domain-generation algorithms). | Hash-like names of some legitimate services. |
+| `url.host.shortener` | LOW | A host from `shared/shorteners.json`. | Hides the destination. | Very common legitimately. Replaces `email.links.shortener`. |
+| `url.userinfo.present` | HIGH if the part before `@` looks like a site or names a brand, otherwise MEDIUM | The URL has `user@` or `user:pass@` before the host. | People read `paypal.com@evil.example` as PayPal; the browser goes to `evil.example`. | Rare in links sent to people; some FTP and internal links. |
+| `url.brand.in_subdomain` | HIGH | A brand keyword appears in the subdomain of a domain the brand doesn't own (`login.microsoft.com.evil.example`). | Only the end of a name says who owns it; the start is free for anyone to write. | Partners and resellers with brand names in their subdomains. |
+| `url.brand.in_path` | MEDIUM with a sign-in word in the path, otherwise LOW | A brand keyword appears in the path on someone else's domain. | Fake sign-in pages are often at `/paypal/login`. | News, reviews and support forums that mention brands. |
+| `url.tld.suspicious` | LOW | The TLD is in `shared/suspicious-tlds.json` (sources and date in the file). | These TLDs are heavily over-represented in phishing. | Most sites on them are legitimate. |
+| `url.port.non_standard` | LOW | An explicit port other than 80 or 443. | Often a temporary or hand-run server. | Development servers and some self-hosted services. |
