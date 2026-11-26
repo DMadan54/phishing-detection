@@ -42,6 +42,11 @@ extension/web-ext-artifacts/
 !engine/tests/fixtures/email/keys/dkim-test-private.pem
 
 # ---------------------------------------------------------------------------
+# Local assistant instructions: kept on this machine, not published.
+# ---------------------------------------------------------------------------
+CLAUDE.md
+
+# ---------------------------------------------------------------------------
 # Playwright (sandbox worker and end-to-end tests)
 # ---------------------------------------------------------------------------
 playwright-report/
