@@ -1,0 +1,22 @@
+Return-Path: <bounce@paypa1.test>
+Received: from mail.paypa1.test (mail.paypa1.test [203.0.113.20])
+	by mx.recipient.example with ESMTPS id 4kTx9;
+	Mon, 05 Jan 2026 10:00:05 +0000
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=paypa1.test;
+ i=@paypa1.test; q=dns/txt; s=s1; t=1767607200; h=from : to : subject :
+ date : message-id : content-type;
+ bh=g6gVGyIraPmItPULoxq4z9QRHBfM6vH5o0uEydtEp5o=;
+ b=TvEY3YOK7PUOd4edKz/FvuCRvqBLlm+WjkRLhUpWgRxuG6kBZS4hZMQUXUevSxaXUo1Fr
+ W+e0xqNlzcfOyvUduuX0Jk5iMGRlEMh1jlNEGvK8GWDAySzVtuhs3KYvP0l2I5Tz3+0bz/G
+ +UwvoX9T5P7IGDZIPqvhJmYbCjJ0UzUFXjWwyrDbpXQ40VRfuWHHWQ7Ljd6Y8bN4fNnmkO1
+ 8G0EosVewS4YKmBmgnhKsu4w87t+JhGf5A9WMh/VJlaC1zXfcXp8Vf5Cf8nE9uPjBBaNoAE
+ 7SK/2I6aidB91p3WikYuaT0LdDlG109k4dcrE9kLCupWB139MT+zbtc+ar3Q==
+From: PayPal Support <support@paypa1.test>
+To: you@recipient.example
+Subject: Security notice
+Date: Mon, 05 Jan 2026 10:00:00 +0000
+Message-ID: <s1@paypa1.test>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=utf-8
+
+We noticed a new sign-in. Review it at https://paypa1.test/review

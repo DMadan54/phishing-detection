@@ -63,6 +63,12 @@ plugins = ["pydantic.mypy"]
 mypy_path = "engine"
 explicit_package_bases = true
 
+# These mail libraries ship without type information. Each is used only
+# behind a small typed adapter in phishlens.email.
+[[tool.mypy.overrides]]
+module = ["dkim", "dkim.*", "spf", "authres", "authres.*", "oletools", "oletools.*"]
+ignore_missing_imports = true
+
 [tool.pydantic-mypy]
 init_forbid_extra = true
 init_typed = true

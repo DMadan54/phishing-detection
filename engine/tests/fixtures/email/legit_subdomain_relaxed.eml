@@ -1,0 +1,23 @@
+Return-Path: <bounce@em.mail.shop.example>
+Received: from mta.shop.example (mta.shop.example [192.0.2.11])
+	by mx.recipient.example with ESMTPS id 4kTx9;
+	Mon, 05 Jan 2026 10:00:05 +0000
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=mail.shop.example;
+ i=@mail.shop.example; q=dns/txt; s=s1; t=1767607200; h=from : to :
+ subject : date : message-id : content-type;
+ bh=W2DQn/MRMmPEZabqRZqUxIZsIsY2fQUZkJPulzCuZ1Y=;
+ b=FFKxJLZmavnI0Cq+MljaRiA0FR19iY7KxjGWuup1RUvW0YxZaTx8M+lNwBXKH64b6IGcF
+ xbG/ZvM6WI5aV82X7z1V7EoTJ8KKIe67aInWqWrGNnwxxYKTQZiw1ygZGnaPnLQ47kICCVF
+ BPpieSh99qNmuR8AOV7gG+rbIh6MPVycrl5gcVq8Ex5S6yhhOgedYa56M3mAR6f/6e24oGl
+ hwJthk1DFjzC50l9OV3ezbrBE6D1vOFIbDVKbsheKOQQgjZw1d3Ah20AfrpWPKWqYOdLtza
+ l5pNAG/TwQLy+HJ7uitmA07kRAKV3H634gn5XQUzbQkFrb5ejLogIRt6kgqA==
+From: Example Shop Orders <orders@shop.example>
+To: you@recipient.example
+Subject: Your order has shipped
+Date: Mon, 05 Jan 2026 10:00:00 +0000
+Message-ID: <o-77@mta.shop.example>
+MIME-Version: 1.0
+Reply-To: support@help.shop.example
+Content-Type: text/plain; charset=utf-8
+
+Your order 77 has shipped. Track it at https://track.shop.example/77

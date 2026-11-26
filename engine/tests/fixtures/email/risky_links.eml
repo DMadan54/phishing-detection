@@ -1,0 +1,29 @@
+Return-Path: <bounce@mail.shop.example>
+Received: from mta.shop.example (mta.shop.example [192.0.2.10])
+	by mx.recipient.example with ESMTPS id 4kTx9;
+	Mon, 05 Jan 2026 10:00:05 +0000
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=shop.example;
+ i=@shop.example; q=dns/txt; s=s1; t=1767607200; h=from : to : subject
+ : date : message-id : content-type;
+ bh=/qOw7LOuQdS/9Zg3GUKi3JE9wK6WaeJygJtIrbpt7Uo=;
+ b=MufSXwz1XJS4jlhWskfRngIuVGZY6Erdo4QLaI/GJUo6hhOYINUEYcfi5yrF+9DFgm1ms
+ EJ+v+/khc7eWrdMfvNOzLmTUVdmXTsYFRp+N54orERFekvDSCwHag4Gbex7R2DxQTZ8hYrW
+ /qgRHAJUAEX5PkSZoHFoC/vqWITusnVBjoSBhBXvBMlxXsnxJZLuY5K6ke58TFxzbO/hlS0
+ lGchPQojy9JKaxM5Pspdarsc9wa31LCw7rBATH1p2jPTvIK98hu+ocpH2IV1inISBHocRfJ
+ et7jesAxN3pGH//xTV6hYHCejUr14jTpeTL3+UNsoKEyZByBU6tU0J9ZW21Q==
+From: Example Shop <news@shop.example>
+To: you@recipient.example
+Subject: Links
+Date: Mon, 05 Jan 2026 10:00:00 +0000
+Message-ID: <r1@shop.example>
+MIME-Version: 1.0
+Content-Type: text/html; charset=utf-8
+
+<html><body>
+<a href="http://198.51.100.77/login">Sign in</a>
+<a href="http://3325256781/login">Sign in again</a>
+<a href="https://bit.ly/3xYzAbc">Short link</a>
+<a href="javascript:alert(1)">Open</a>
+<a href="data:text/html;base64,PGgxPkhlbGxvPC9oMT4=">Preview</a>
+<a href="https://shop.example/help">Help</a>
+</body></html>

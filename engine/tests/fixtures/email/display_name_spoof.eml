@@ -1,0 +1,13 @@
+Return-Path: <billing@random.test>
+Received: from mail.random.test (mail.random.test [203.0.113.30])
+	by mx.recipient.example with ESMTPS id 4kTx9;
+	Mon, 05 Jan 2026 10:00:05 +0000
+From: "service@paypal.com" <billing@random.test>
+To: you@recipient.example
+Subject: Invoice
+Date: Mon, 05 Jan 2026 10:00:00 +0000
+Message-ID: <i1@random.test>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=utf-8
+
+Please find your invoice details below.

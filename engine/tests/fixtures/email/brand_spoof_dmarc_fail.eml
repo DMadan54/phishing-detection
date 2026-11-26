@@ -1,0 +1,27 @@
+Return-Path: <bounce@evil.test>
+Received: from mail.evil.test (mail.evil.test [203.0.113.5])
+	by mx.recipient.example with ESMTPS id 4kTx9;
+	Mon, 05 Jan 2026 10:00:05 +0000
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=evil.test;
+ i=@evil.test; q=dns/txt; s=s1; t=1767607200; h=from : to : subject :
+ date : message-id : content-type;
+ bh=yXDR13FQY1ixyVTOS/1PG+fNVM6Bj4D+6X6pFgKFA7Y=;
+ b=dbYuagA4IuFYn/ARHSClteTh7AQ//jzE88uCH+Mn/xgTpU5iLvShLVB2AwdRMMnGz8uPk
+ s7KWRb87zUNaqXZ5fdkrQVKHRctzG3BLOvVlZE/Br6FBt26UvBCcbiuXpGPxzs7jPKXWyEm
+ xShl1cWlc8zvE324sV1fVC3oG9gzK7tHHPerHc0czFVg5jnSU0qa1zz49Eke00JiK2EnHij
+ 6edpLHKNsQOErK6zlMXM+9KQ2ZcvZ2B6Nt6BRevUwAQokZD99LUPiOnchxkDAh2sAZHZkq5
+ 8nzrIctJUOq19dRW8Iqvj8qfisIMGu6vYTqSDBI8FmGYmhHzJZ6sSyyocSJg==
+From: "PayPal" <service@paypal.com>
+To: you@recipient.example
+Subject: Your account has been suspended
+Date: Mon, 05 Jan 2026 10:00:00 +0000
+Message-ID: <x9@evil.test>
+MIME-Version: 1.0
+Content-Type: text/html; charset=utf-8
+
+<html><body><p>Dear customer,</p>
+<p>Your account has been suspended because of unusual activity.
+Please verify within 24 hours and confirm your password, or your
+account will be closed.</p>
+<p><a href="https://login.evil.test/paypal">Restore access</a></p>
+</body></html>

@@ -1,0 +1,35 @@
+Return-Path: <accounts@random.test>
+Received: from mail.random.test (mail.random.test [203.0.113.30])
+	by mx.recipient.example with ESMTPS id 4kTx9;
+	Mon, 05 Jan 2026 10:00:05 +0000
+From: Accounts <accounts@random.test>
+To: you@recipient.example
+Subject: Documents
+Date: Mon, 05 Jan 2026 10:00:00 +0000
+Message-ID: <b1@random.test>
+MIME-Version: 1.0
+Content-Type: multipart/mixed; boundary="mix"
+
+--mix
+Content-Type: text/plain; charset=utf-8
+
+Two files attached.
+
+--mix
+Content-Type: application/octet-stream
+Content-Disposition: attachment; filename*=utf-8''invoice%E2%80%AEfdp.exe
+Content-Transfer-Encoding: base64
+
+TVoAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAFBoaXNoTGVucyB0ZXN0IGZpeHR1cmUuIE5vdCBhIHJlYWwgcHJvZ3JhbS4NCg==
+
+--mix
+Content-Type: application/zip
+Content-Disposition: attachment; filename="documents.zip"
+Content-Transfer-Encoding: base64
+
+UEsDBBQAAAAAAABQJVzGNbk7BQAAAAUAAAAKAAAAcmVhZG1lLnR4dHRlc3QKUEsBAhQAFAAAAAAA
+AFAlXMY1uTsFAAAABQAAAAoAAAAAAAAAAAAAAIABAAAAAHJlYWRtZS50eHRQSwUGAAAAAAEAAQA4
+AAAALQAAAAAA
+
+--mix--

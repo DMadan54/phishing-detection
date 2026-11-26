@@ -108,6 +108,12 @@ wheels = [
 ]
 
 [[package]]
+name = "authres"
+version = "1.2.0"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/6a/29/e28209b5d3d56c102845cca5a4a3abaf2724f79e83476a52b94d775ecce6/authres-1.2.0.tar.gz", hash = "sha256:93d1b995ad7ce21e62db649f361048125dd6022563a0ae8a23909465f1fd25b7", size = 23226, upload-time = "2019-08-03T19:38:00.494Z" }
+
+[[package]]
 name = "certifi"
 version = "2026.11.20"
 source = { registry = "https://pypi.org/simple" }
@@ -133,6 +139,15 @@ sdist = { url = "https://files.pythonhosted.org/packages/d8/53/6f443c9a4a8358a93
 wheels = [
     { url = "https://files.pythonhosted.org/packages/d1/d6/3965ed04c63042e047cb6a3e6ed1a63a35087b6a609aa3a15ed8ac56c221/colorama-0.4.6-py2.py3-none-any.whl", hash = "sha256:4f1d9991f5acc0ca119f9d443620b77f9d6b33703e51011c16baf57afb285fc6", size = 25335, upload-time = "2022-10-25T02:36:20.889Z" },
 ]
+
+[[package]]
+name = "dkimpy"
+version = "1.1.8"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "dnspython" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/f0/6f/84e91828186bbfcedd7f9385ef5e0d369632444195c20e08951b7ffe0481/dkimpy-1.1.8.tar.gz", hash = "sha256:b5f60fb47bbf5d8d762f134bcea0c388eba6b498342a682a21f1686545094b77", size = 66979, upload-time = "2024-07-04T22:16:38.321Z" }
 
 [[package]]
 name = "dnspython"
@@ -418,6 +433,8 @@ name = "phishlens"
 version = "0.1.0"
 source = { editable = "engine" }
 dependencies = [
+    { name = "authres" },
+    { name = "dkimpy" },
     { name = "dnspython" },
     { name = "fastapi" },
     { name = "httpx" },
@@ -425,11 +442,14 @@ dependencies = [
     { name = "publicsuffixlist" },
     { name = "puremagic" },
     { name = "pydantic" },
+    { name = "pyspf" },
     { name = "uvicorn" },
 ]
 
 [package.metadata]
 requires-dist = [
+    { name = "authres", specifier = ">=1.2" },
+    { name = "dkimpy", specifier = ">=1.1.6" },
     { name = "dnspython", specifier = ">=2.7" },
     { name = "fastapi", specifier = ">=0.115" },
     { name = "httpx", specifier = ">=0.27" },
@@ -437,6 +457,7 @@ requires-dist = [
     { name = "publicsuffixlist", specifier = ">=1.0" },
     { name = "puremagic", specifier = ">=2.0" },
     { name = "pydantic", specifier = ">=2.9" },
+    { name = "pyspf", specifier = ">=2.0.14" },
     { name = "uvicorn", specifier = ">=0.32" },
 ]
 
@@ -626,6 +647,12 @@ sdist = { url = "https://files.pythonhosted.org/packages/49/2e/ced460408999b33da
 wheels = [
     { url = "https://files.pythonhosted.org/packages/71/46/17f022dd3e953bf20a04a028a21ec746d942f8d2af30fa0f124fa0e6a684/pygments-2.21.0-py3-none-any.whl", hash = "sha256:2363c69b61c4a97c838da3b130dcd6468f4848992b21a82f2a63ec34377137d9", size = 1250147, upload-time = "2026-08-17T08:02:44.912Z" },
 ]
+
+[[package]]
+name = "pyspf"
+version = "2.0.14"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/d4/dc/5b3838ff90474e21fe0914920c53430f73402e07d6598ea228e61b74963e/pyspf-2.0.14.tar.gz", hash = "sha256:57a7ef01bda090173aafb6af0106251686ed73f03db4e911fcd34c57fc347186", size = 69446, upload-time = "2020-01-02T02:54:37.109Z" }
 
 [[package]]
 name = "pytest"

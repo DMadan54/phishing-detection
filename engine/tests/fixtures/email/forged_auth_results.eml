@@ -1,0 +1,14 @@
+Return-Path: <bounce@evil.test>
+Received: from mail.evil.test (mail.evil.test [203.0.113.5])
+	by mx.recipient.example with ESMTPS id 4kTx9;
+	Mon, 05 Jan 2026 10:00:05 +0000
+Authentication-Results: mx.google.com; dkim=pass header.d=paypal.com; spf=pass smtp.mailfrom=paypal.com; dmarc=pass header.from=paypal.com
+From: PayPal <service@paypal.com>
+To: you@recipient.example
+Subject: Payment received
+Date: Mon, 05 Jan 2026 10:00:00 +0000
+Message-ID: <p1@paypal.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=utf-8
+
+You received a payment. Log in to view it.

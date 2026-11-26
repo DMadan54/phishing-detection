@@ -1,0 +1,42 @@
+Return-Path: <bounce@mail.shop.example>
+Received: from mta.shop.example (mta.shop.example [192.0.2.10])
+	by mx.recipient.example with ESMTPS id 4kTx9;
+	Mon, 05 Jan 2026 10:00:05 +0000
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=shop.example;
+ i=@shop.example; q=dns/txt; s=s1; t=1767607200; h=from : to : subject
+ : date : message-id : content-type;
+ bh=M6TugF7RtUtYjMa6vqoRi3i5BJ8K9eiGGVAD1caXM38=;
+ b=fJ8Kexl5BpxnoAxNwHgs3CsnFF/TBdsLJKPwlzcOvvkYq5poXg/YuQ3ncdh8TEf/ZVQUe
+ ab81FIFFE2gQOm7rCUiyUBhUUnZL+0purxi/Gm+0x6/auZJOHZ6ChKpvbBJR3wQw4p2CbrY
+ L/yZhVMCX9QCpnJc6XJZte+9wR/+nnmn/mWBT8aT2zJWZAXq0tR5w0JtagiIIt615aiKY/f
+ vvB5Ecf8jREkOUUE/wgp+EM04vqtcb4XWEmLvNOW0kqJqPBRjEHVqDziZ3lzzq0325Ka3o2
+ KoFfyuDVPaJ0Ch6j/XclI5oeyYkKK8db+WIBBNpjYOOZ7e7VBR/wZX1xYPDw==
+From: Example Shop <news@shop.example>
+To: you@recipient.example
+Subject: Your report
+Date: Mon, 05 Jan 2026 10:00:00 +0000
+Message-ID: <t1@shop.example>
+MIME-Version: 1.0
+Content-Type: multipart/mixed; boundary="mix"
+
+--mix
+Content-Type: text/plain; charset=utf-8
+
+Report and photo attached.
+
+--mix
+Content-Type: application/pdf
+Content-Disposition: attachment; filename="report.pdf"
+Content-Transfer-Encoding: base64
+
+UEsDBBQAAAAAAABQJVyDFtyMAQAAAAEAAAAFAAAAYS50eHR4UEsBAhQAFAAAAAAAAFAlXIMW3IwB
+AAAAAQAAAAUAAAAAAAAAAAAAAIABAAAAAGEudHh0UEsFBgAAAAABAAEAMwAAACQAAAAAAA==
+
+--mix
+Content-Type: image/png
+Content-Disposition: attachment; filename="photo.png"
+Content-Transfer-Encoding: base64
+
+iVBORw0KGgoAAAANSUhEUgAAAAAAAAAAAAAAAAAAAAAA
+
+--mix--

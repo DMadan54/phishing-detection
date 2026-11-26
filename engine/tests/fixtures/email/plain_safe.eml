@@ -1,0 +1,15 @@
+Return-Path: <alice@company.example>
+Received: from mail.company.example (mail.company.example [192.0.2.50])
+	by mx.recipient.example with ESMTPS id 4kTx9;
+	Mon, 05 Jan 2026 10:00:05 +0000
+From: Alice Example <alice@company.example>
+To: you@recipient.example
+Subject: Lunch tomorrow?
+Date: Mon, 05 Jan 2026 10:00:00 +0000
+Message-ID: <1@company.example>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=utf-8
+
+Hi,
+Are you free for lunch tomorrow at 12?
+Alice

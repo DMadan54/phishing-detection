@@ -1,0 +1,13 @@
+Return-Path: <updates@permerror.example>
+Received: from mail.permerror.example (mail.permerror.example [203.0.113.61])
+	by mx.recipient.example with ESMTPS id 4kTx9;
+	Mon, 05 Jan 2026 10:00:05 +0000
+From: Updates <updates@permerror.example>
+To: you@recipient.example
+Subject: Update
+Date: Mon, 05 Jan 2026 10:00:00 +0000
+Message-ID: <u2@permerror.example>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=utf-8
+
+An update.

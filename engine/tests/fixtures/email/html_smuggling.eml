@@ -1,0 +1,31 @@
+Return-Path: <payments@random.test>
+Received: from mail.random.test (mail.random.test [203.0.113.30])
+	by mx.recipient.example with ESMTPS id 4kTx9;
+	Mon, 05 Jan 2026 10:00:05 +0000
+From: Payments <payments@random.test>
+To: you@recipient.example
+Subject: Remittance advice
+Date: Mon, 05 Jan 2026 10:00:00 +0000
+Message-ID: <h1@random.test>
+MIME-Version: 1.0
+Content-Type: multipart/mixed; boundary="mix"
+
+--mix
+Content-Type: text/plain; charset=utf-8
+
+Open the attached remittance.
+
+--mix
+Content-Type: text/html
+Content-Disposition: attachment; filename="remittance.html"
+Content-Transfer-Encoding: base64
+
+PGh0bWw+PGJvZHk+PHA+TG9hZGluZyB5b3VyIHJlbWl0dGFuY2UgYWR2aWNlLi4uPC9wPgo8c2Ny
+aXB0Pgp2YXIgZGF0YSA9IGF0b2IoIlNHVnNiRzhzSUhSb2FYTWdhWE1nWVNCb1lYSnRiR1Z6Y3lC
+UWFHbHphRXhsYm5NZ2RHVnpkQ0JtYVd4bExnPT0iKTsKdmFyIGJsb2IgPSBuZXcgQmxvYihbZGF0
+YV0sIHt0eXBlOiAiYXBwbGljYXRpb24vb2N0ZXQtc3RyZWFtIn0pOwp2YXIgYSA9IGRvY3VtZW50
+LmNyZWF0ZUVsZW1lbnQoImEiKTsKYS5ocmVmID0gVVJMLmNyZWF0ZU9iamVjdFVSTChibG9iKTsK
+YS5kb3dubG9hZCA9ICJyZW1pdHRhbmNlLnR4dCI7CmEuY2xpY2soKTsKPC9zY3JpcHQ+PC9ib2R5
+PjwvaHRtbD4K
+
+--mix--

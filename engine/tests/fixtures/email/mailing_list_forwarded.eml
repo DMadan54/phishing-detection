@@ -1,0 +1,59 @@
+Return-Path: <shop-fans-bounces@lists.example>
+Received: from mail.lists.example (mail.lists.example [198.51.100.20])
+	by mx.recipient.example with ESMTPS id 4kTx9;
+	Mon, 05 Jan 2026 10:00:05 +0000
+ARC-Seal: i=1; cv=none; a=rsa-sha256; d=lists.example; s=s1;
+ t=1767607260;
+ b=jftd3pIAQrfo5qvg4cj97k4vi64z6/VJfnWXiZaknLREQDTx74guD5UcSJurJ8QwfkPry
+ iftcN3yh78wTYk8dRvyxD8xEfqJaJcCGp6fW6VhYAAirPzMSxi5OFkkShqkz54xD0QxKDw5
+ oxcgi+LQd12kZhiQvOIvDp1YyRiItao/mriuS2X2fbIUlAtUmW2NNGmSnX3JEUOBjmrG3KJ
+ KEG7V1NdtzTXROAHFvUZl7q1IDwVsW6RgIP1vuPUlap+1Epc7ZgDcI5bKysp5gv/KoFQpzy
+ Z7Aw6URDC5LKVVS2FkTaU568qvACnc+EG5kMKVbyWOETKuSyCisVcVZeI5jQ==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed;
+ d=lists.example; s=s1; t=1767607260; h=list-id : reply-to : from : to
+ : subject : date : message-id : mime-version : content-type : from;
+ bh=vOPGLpSZDbVoO588bEp/3NU2E1WjEq7djhcaY2SnGac=;
+ b=aROBoU/rVtU5MJS0gS2NrOg3OtRpUPTt+N7J+/xjpWZwxcB96ndzf4WbcNEoXNAPvRau5
+ Mbe510vu/zCsBIkmbSYuILkkQkW74AZejBiiEbzi6/Z41QisvZG0Vpo4XzVVP7KfqE9O97c
+ ErLm/xE3V12mMon4x5EMpsyCQTRs9//ZYWSfUs1bp0v1K/AnBbtJRHVUnP04vZXNsdg9kkL
+ UBUJY7q+Viszz3xU0Jk8b4PPw2+T2rp+IJv2Op8JhWhC78lysd0fYFHFSGUwxdKRxj3u3Gy
+ 2pouwqIzyJp8j7vBSqbXCEZxQsB0v37jbSV7h9i1wS39gYncSpjBpzbLG+KQ==
+ARC-Authentication-Results: i=1; lists.example;
+ dkim=pass header.d=shop.example;
+ spf=pass smtp.mailfrom=mail.shop.example;
+ dmarc=pass header.from=shop.example
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=lists.example;
+ i=@lists.example; q=dns/txt; s=s1; t=1767607200; h=from : to : subject
+ : date : message-id : content-type;
+ bh=vOPGLpSZDbVoO588bEp/3NU2E1WjEq7djhcaY2SnGac=;
+ b=JmiM4wk37wEaG6qpznV60M5ewRa7NleSS3AJL/YyzjhNL2te2avPP1+/+epLSd+ErD0DN
+ wEdJQc+d5YLFWfZSeWPkVQ8fCUoRC4HP5JqQnZgT/MplaeHJMFKeprK6u3qgzk8s/BvAmc/
+ jJtvw1nMBJTeMwQVrs8MPaBHYXibqYoCSlvafnDOMajGO4z/uKFFGrT0WvxeRe0E4XVNZU7
+ E75xQ6pMU2/OiLn0BiH5lEoAnfX1/XK1Cqfj91nKnFGu2upeCbQtoXLKCUKdYe4ICbqa1pR
+ IiYLKV7PlKR09WKFf47y3sGpYcDqRtJudget2u2tFaMIh0HmCebnvy4BPdhA==
+Authentication-Results: lists.example; dkim=pass header.d=shop.example; spf=pass smtp.mailfrom=mail.shop.example; dmarc=pass header.from=shop.example
+Received: from mta.shop.example (mta.shop.example [192.0.2.10])
+	by lists.example with ESMTPS id 4kTx9;
+	Mon, 05 Jan 2026 10:00:00 +0000
+List-Id: Shop fans <shop-fans.lists.example>
+Reply-To: shop-fans@lists.example
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=shop.example;
+ i=@shop.example; q=dns/txt; s=s1; t=1767607200; h=from : to : subject
+ : date : message-id : content-type;
+ bh=QQB++Rpa/EKj3j80+cekGLK0sdssfsGsglbAN6KCF0w=;
+ b=pezkXdMXzEiFoQL467Xe5VHwb595oQGxLzHSf+CMxF7+eYOrDj29ow1nTb4uALqfwxBAS
+ nyuENXmrxYIyLzZnNnempj0EJloxAVrSYAIEGaSXEIHoairjjH0cNBouEL74y1JeYF9fd9X
+ vRSkQ2dyRz9xtjQgGAWrUMZkWoVr4qGqPOGzKg6IvKB5BBW6KSfC2PX/RGKU4zCPM4AUoWu
+ RnLKzdOmTTi+E/gvHOkqKuzRX0g57sNbt988ylTndo3oHIYSsh5HZ1mOayUIk4gqphrMKnh
+ GcszSsxvu8J65KKDqvkA5TXuaaKy+MdkLyzo9/G9vDBmdLQDJAJX+hzdWdTQ==
+From: Example Shop <news@shop.example>
+To: you@recipient.example
+Subject: [shop-fans] Spring meetup
+Date: Mon, 05 Jan 2026 10:00:00 +0000
+Message-ID: <ml-5@shop.example>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=utf-8
+
+Join us for the spring meetup on 12 March.
+--
+shop-fans mailing list: https://lists.example/shop-fans

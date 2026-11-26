@@ -1,0 +1,26 @@
+Return-Path: <bounce@mail.shop.example>
+Received: from mta.shop.example (mta.shop.example [192.0.2.10])
+	by mx.recipient.example with ESMTPS id 4kTx9;
+	Mon, 05 Jan 2026 10:00:05 +0000
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=shop.example;
+ i=@shop.example; q=dns/txt; s=s1; t=1767607200; h=from : to : subject
+ : date : message-id : content-type;
+ bh=ZLFLt8rRbxgttLH42uTkuRGfgMnWJ8mD2yERB1I2LnM=;
+ b=RQ4ptaO9ki4RibE0e6sP7RSeRAl3vjy6Eca0BBz54PHucsr7CMq4sCvuPHqKU1VORew7v
+ 0R1lfGRnWEbGryAqrVWdGMfR+v5KxVVvaELEg6jbijgZ0P7isxv0i6o3H9T7VngAfUxFHNm
+ mKmCUmXH+77RmvUbfj1T+8h3H3zvPbRIb2C6KJtRhzV0jWrGE8Y3uLXnW0QthAS1L/OMITW
+ L5UpzF+/QU25oIZPo5AsJ8uv3Df56HTgo0sJN8lj7ZX/B30KvynSdtaTvlejBUI9//GGMr/
+ Owd3f/lPFBYwPKOAJqGgL+MsqO8/+3qYY2fbUJsIPCoNImr51vTndvFXSJow==
+From: Example Shop <news@shop.example>
+To: you@recipient.example
+Subject: Account update
+Date: Mon, 05 Jan 2026 10:00:00 +0000
+Message-ID: <l1@shop.example>
+MIME-Version: 1.0
+Content-Type: text/html; charset=utf-8
+
+<html><body>
+<p><a href="https://evil.test/signin">www.paypal.com</a></p>
+<p><a href="https://shop.example/a">https://shop.example/a</a></p>
+<p><a href="https://click.shop.example/t?u=1">shop.example</a></p>
+</body></html>

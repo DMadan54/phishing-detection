@@ -1,0 +1,37 @@
+Return-Path: <bounce@mail.shop.example>
+Received: from mta.shop.example (mta.shop.example [192.0.2.10])
+	by mx.recipient.example with ESMTPS id 4kTx9;
+	Mon, 05 Jan 2026 10:00:05 +0000
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=shop.example;
+ i=@shop.example; q=dns/txt; s=s1; t=1767607200; h=from : to : subject
+ : date : message-id : content-type;
+ bh=Car/Rd+s5SmmDomlSzBjBs1sso3B/I47Zawp01wOABg=;
+ b=XEh+nGfa/9jb+AeGJ8tuoaWbtkXiixfGnRgGcPDhgiAB+vcXLplPxoiyOFZ+hGO7j0L5U
+ D6bWu8PtbyF4dme1w/bw+X6EcsiVMncVEik5Peo37g/pFRW80KwubzYqatvcLTKMYVVwL/9
+ 2Mm2mOOxyz8t70LF0mVgukeO7idjcwsh33Uh5LhseFOghfK0XTMkDcpwZH87rT56+YBGcDg
+ bDejcQNE7iaCKOPlsuJh5gQNECh4VUD/Hln26kkNEUFA3StFGgt+XT3H+9HfundKoiS24Gk
+ uXI46+pAHEqcsITsKFt8X/iZGDfvPy6t8ts62WMKZWHAdAmfydHjq4WXyd4A==
+From: Example Shop <news@shop.example>
+To: you@recipient.example
+Subject: January offers
+Date: Mon, 05 Jan 2026 10:00:00 +0000
+Message-ID: <n-1001@shop.example>
+MIME-Version: 1.0
+Reply-To: help@shop.example
+List-Unsubscribe: <https://shop.example/unsubscribe>
+Content-Type: multipart/alternative; boundary="alt"
+
+--alt
+Content-Type: text/plain; charset=utf-8
+
+Our January offers: https://shop.example/offers
+
+--alt
+Content-Type: text/html; charset=utf-8
+
+<html><body><h1>January offers - now 90% off!</h1>
+<p>See <a href="https://shop.example/offers">our offers</a> or visit
+<a href="https://www.shop.example/">www.shop.example</a>.</p>
+</body></html>
+
+--alt--

@@ -36,6 +36,10 @@ extension/web-ext-artifacts/
 *.pem
 *.key
 .claude/settings.local.json
+# The one exception: a throwaway key that signs the DKIM and ARC test
+# fixtures. It is published only in the tests' fake DNS and never used for
+# real mail.
+!engine/tests/fixtures/email/keys/dkim-test-private.pem
 
 # ---------------------------------------------------------------------------
 # Playwright (sandbox worker and end-to-end tests)

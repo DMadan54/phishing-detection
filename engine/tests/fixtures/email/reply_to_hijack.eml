@@ -1,0 +1,15 @@
+Return-Path: <ceo@company.example>
+Received: from mail.evil.test (mail.evil.test [203.0.113.40])
+	by mx.recipient.example with ESMTPS id 4kTx9;
+	Mon, 05 Jan 2026 10:00:05 +0000
+From: Jane Smith <ceo@company.example>
+To: you@recipient.example
+Subject: Urgent: wire transfer today
+Date: Mon, 05 Jan 2026 10:00:00 +0000
+Message-ID: <w1@company.example>
+MIME-Version: 1.0
+Reply-To: jane.smith.ceo@freemail.test
+Content-Type: text/plain; charset=utf-8
+
+I need you to process an urgent payment today. Reply with confirmation.
+Jane
