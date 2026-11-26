@@ -10,7 +10,7 @@ because multipart uploads over 1 MB are spooled to a temporary file on disk.
 import os
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from http import HTTPStatus
 from typing import Any, Literal
 
@@ -19,11 +19,12 @@ from fastapi import FastAPI, HTTPException, Request
 from pydantic import BaseModel, ConfigDict, Field
 
 from phishlens import __version__
+from phishlens.dnsbridge import CachingDns
 from phishlens.findings import CheckContext, Finding
 from phishlens.limits import BodySizeLimitMiddleware
 from phishlens.registry import Registry, default_registry, parse_disabled
 from phishlens.runner import run_checks
-from phishlens.services import SystemClock, UnconfiguredDns, UnconfiguredRdap
+from phishlens.services import DnspythonResolver, SystemClock, UnconfiguredRdap
 from phishlens.subjects import RawEmail, RawUrl
 
 MAX_EMAIL_BYTES = 10 * 1024 * 1024
@@ -93,7 +94,7 @@ def create_app(registry: Registry | None = None, context: CheckContext | None = 
             return
         async with httpx.AsyncClient(timeout=10.0, follow_redirects=False) as http:
             state.context = CheckContext(
-                dns=UnconfiguredDns(), rdap=UnconfiguredRdap(), http=http, clock=SystemClock()
+                dns=DnspythonResolver(), rdap=UnconfiguredRdap(), http=http, clock=SystemClock()
             )
             yield
             state.context = None
@@ -106,9 +107,10 @@ def create_app(registry: Registry | None = None, context: CheckContext | None = 
     )
 
     def current_context() -> CheckContext:
+        """The context for one request: shared services plus a fresh DNS cache."""
         if state.context is None:
             raise RuntimeError("the app was started without a check context")
-        return state.context
+        return replace(state.context, dns=CachingDns(state.context.dns))
 
     @app.get("/health")
     async def health() -> Health:

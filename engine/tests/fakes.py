@@ -6,17 +6,31 @@ from datetime import UTC, datetime
 import httpx
 
 from phishlens.findings import CheckContext
-from phishlens.services import RdapRecord, RecordType
+from phishlens.services import DnsTemporaryError, RdapRecord, RecordType
 
 
 @dataclass
 class FakeDns:
-    """Answers from a dict; unknown names have no records."""
+    """Answers from a dict; unknown names have no records.
+
+    Names in ``failing`` raise DnsTemporaryError, like a timeout would.
+    ``lookups`` records every query, so tests can count them.
+    """
 
     records: dict[tuple[str, RecordType], list[str]] = field(default_factory=dict)
+    failing: set[tuple[str, RecordType]] = field(default_factory=set)
+    lookups: list[tuple[str, RecordType]] = field(default_factory=list)
+
+    def add(self, name: str, rdtype: RecordType, *values: str) -> "FakeDns":
+        self.records.setdefault((name.lower(), rdtype), []).extend(values)
+        return self
 
     async def resolve(self, name: str, rdtype: RecordType) -> list[str]:
-        return list(self.records.get((name.lower(), rdtype), []))
+        key = (name.lower().rstrip("."), rdtype)
+        self.lookups.append(key)
+        if key in self.failing:
+            raise DnsTemporaryError("fake timeout")
+        return list(self.records.get(key, []))
 
 
 @dataclass
