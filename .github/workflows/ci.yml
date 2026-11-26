@@ -1,0 +1,44 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+# Least privilege: the job can read the code and nothing else. A compromised
+# dependency or action running here can't push, tag or change releases.
+permissions:
+  contents: read
+
+jobs:
+  engine:
+    name: Engine (lint, types, tests)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - uses: astral-sh/setup-uv@v10
+        with:
+          enable-cache: true
+          cache-dependency-glob: uv.lock
+          cache-python: true
+
+      # Python 3.12 comes from .python-version. --locked fails the build if
+      # uv.lock is out of date with pyproject.toml instead of silently
+      # resolving new versions.
+      - name: Install
+        run: uv sync --locked
+
+      - name: Ruff (lint)
+        run: uv run ruff check --output-format=github
+
+      - name: Ruff (format)
+        run: uv run ruff format --check
+
+      - name: Mypy
+        run: uv run mypy engine
+
+      - name: Pytest
+        run: uv run pytest
