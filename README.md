@@ -35,6 +35,49 @@ nothing is decided by a black box.
 | Extension   | TypeScript, Manifest V3, for Chrome and Firefox               |
 | Evaluation  | Python scripts and a frozen test set                          |
 
+## Running locally
+
+The engine needs [uv](https://docs.astral.sh/uv/), which also installs the
+right Python (3.12, pinned in `.python-version`) on first use.
+
+```sh
+# Install uv (Windows; on macOS or Linux see the uv docs)
+winget install --id astral-sh.uv -e
+
+# Create .venv with the engine and the dev tools, exactly as locked
+uv sync
+
+# Checks (CI runs the same four)
+uv run ruff check
+uv run ruff format --check
+uv run mypy engine
+uv run pytest
+
+# Start the API on http://127.0.0.1:8000 (interactive docs at /docs)
+uv run uvicorn --factory phishlens.api:create_app --reload
+```
+
+To use API keys or turn checks off, copy `.env.example` to `.env`, fill it
+in, and start the API with `uv run --env-file .env uvicorn ...` instead.
+
+Try it from another terminal:
+
+```sh
+curl http://127.0.0.1:8000/health
+
+# An email goes in as the raw body, for example a saved .eml file
+curl -X POST -H "Content-Type: message/rfc822" \
+     --data-binary @message.eml http://127.0.0.1:8000/analyse/email
+
+curl -X POST -H "Content-Type: application/json" \
+     -d '{"url": "https://example.com/login"}' http://127.0.0.1:8000/analyse/url
+```
+
+Limits: emails up to 10 MiB and URLs up to 2048 characters (larger gets
+`413`); a malformed request gets `422`, and an email sent with the wrong
+`Content-Type` gets `415`. Live tests that use the real network are marked
+`live` and skipped unless you run `uv run pytest -m live`.
+
 ## Roadmap
 
 - [ ] Scaffold
