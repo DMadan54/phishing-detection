@@ -90,3 +90,7 @@ eval/data/raw/
 eval/data/cache/
 eval/data/screenshots/
 eval/results/runs/
+
+# Third-party data fetched by scripts/fetch_tranco.py: it changes daily and
+# isn't ours to redistribute. The list ID is pinned in shared/tranco-list.json.
+shared/data/
