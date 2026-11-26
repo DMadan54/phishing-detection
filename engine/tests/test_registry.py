@@ -45,5 +45,6 @@ def test_parse_disabled(value: str | None, expected: frozenset[str]) -> None:
     assert parse_disabled(value) == expected
 
 
-def test_default_registry_builds() -> None:
-    assert default_registry().names == frozenset()
+def test_default_registry_lists_the_email_checks() -> None:
+    names = default_registry().names
+    assert {"email.spf", "email.dkim", "email.dmarc", "email.auth_results"} <= names

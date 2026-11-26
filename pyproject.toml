@@ -84,3 +84,7 @@ markers = [
     "live: talks to the real network; skipped unless selected with -m live",
 ]
 addopts = ["-m", "not live", "--strict-markers"]
+filterwarnings = [
+    # pyspf has an unescaped backslash in a docstring; harmless, not ours.
+    "ignore:invalid escape sequence:SyntaxWarning",
+]

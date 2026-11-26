@@ -8,6 +8,12 @@ naming it in PHISHLENS_DISABLED_CHECKS (comma-separated), for example
 from collections.abc import Iterable
 from dataclasses import dataclass
 
+from phishlens.email.auth_dkim import DkimCheck
+from phishlens.email.auth_dmarc import DmarcCheck
+from phishlens.email.auth_results import AuthResultsCheck
+from phishlens.email.auth_spf import SpfCheck
+from phishlens.email.config import EmailConfig
+from phishlens.email.forwarding import ForwardingCheck
 from phishlens.email.parse import ParsedEmail
 from phishlens.findings import Check
 from phishlens.subjects import RawUrl
@@ -58,9 +64,16 @@ def parse_disabled(value: str | None) -> frozenset[str]:
     return frozenset(name.strip() for name in value.split(",") if name.strip())
 
 
-def default_registry() -> Registry:
+def default_registry(email_config: EmailConfig | None = None) -> Registry:
     """Every check PhishLens runs, in the order findings are reported."""
+    config = email_config or EmailConfig.from_env()
     return Registry(
-        email_checks=(),
+        email_checks=(
+            SpfCheck(config),
+            DkimCheck(),
+            DmarcCheck(config),
+            AuthResultsCheck(config),
+            ForwardingCheck(),
+        ),
         url_checks=(),
     )
