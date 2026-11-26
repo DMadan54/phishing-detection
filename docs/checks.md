@@ -94,3 +94,18 @@ The same rules judge sender domains (`email.from.lookalike`) and link domains. D
 | `url.lookalike.combo` | MEDIUM | The brand name plus a hyphenated word or a sign-in word (`paypal-secure-login`, `securepaypal`). | Looks like an official service page. | Fan sites, resellers and support businesses that use brand names. |
 | `url.idn.mixed_script` | HIGH | One label mixes scripts (Latin with Cyrillic or Greek, for example). Latin with Han, kana, Hangul or Bopomofo is allowed, as UTS #39 allows. | Real names almost never mix alphabets within a word. | Some brand-plus-word names in other languages. |
 | `url.idn.punycode` | INFO | The name is internationalised; shows both the stored `xn--` form and the displayed form. | Lets the reader see exactly what the name is. | None (informational). |
+
+## URL: redirect chain
+
+Only `/analyse/url` follows redirects (pass `"follow_redirects": false` to skip it). Links inside emails are never fetched, because fetching a phishing link can tell the attacker the message was read. Every hop goes through the SSRF guard in `phishlens/net/safe_fetch.py`: only http and https, every resolved address must be public, the connection is pinned to the checked IP, at most 10 hops, 20 seconds and 64 KB per page. Pages are read as text only; nothing is executed.
+
+| Finding id | Severity | What it means | Why it matters | Known false positives |
+|------------|----------|---------------|----------------|-----------------------|
+| `url.redirect.chain` | INFO | The link redirects at least once; every hop is listed as evidence. | Shows where the link really goes. | None (informational). |
+| `url.redirect.shortener` | LOW | A shortener appears after the first hop. | Chained shorteners hide the destination from filters. | Marketing links that wrap shorteners in tracking. |
+| `url.redirect.to_lookalike` | HIGH | A hop on a different owner's domain is a brand lookalike. | The innocent-looking first address leads to a fake site. | Inherits the lookalike rules' false positives. |
+| `url.redirect.meta_refresh` | MEDIUM | A page redirects with `<meta http-equiv="refresh">`. | Gets past scanners that only follow HTTP redirects. | Old sites and some "you are leaving" pages. |
+| `url.redirect.script` | MEDIUM | A page redirects with a literal `location = "..."` or `location.replace(...)`. | Same as meta refresh; found by reading the text, never by running it. | Single-page apps and consent pages. |
+| `url.redirect.blocked` | MEDIUM | A hop pointed at a non-public address (private, loopback, link-local, metadata and so on) and was refused. | Public links have no reason to point inside a network; may be an SSRF attempt. | Links to intranet sites in internal mail. |
+| `url.redirect.too_many` | MEDIUM | More than 10 hops, or a loop. | Long chains wear scanners down. | Broken site configurations. |
+| `url.redirect.error` | INFO | The chain couldn't be followed to the end (DNS failure, timeout, connection or TLS error, a non-web link). | The other checks still apply to the address itself. | Sites that are simply down. |

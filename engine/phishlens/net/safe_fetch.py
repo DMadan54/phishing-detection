@@ -33,11 +33,17 @@ import re
 import ssl
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass, field
-from typing import Literal, Protocol
+from typing import Protocol
 
 import httpcore
 
-from phishlens.services import DnsResolver, DnsTemporaryError
+from phishlens.services import (
+    DnsResolver,
+    DnsTemporaryError,
+    Hop,
+    HopKind,
+    RedirectChain,
+)
 from phishlens.url.parse import ParsedUrl, join, parse_url
 
 IPAddress = ipaddress.IPv4Address | ipaddress.IPv6Address
@@ -201,9 +207,6 @@ class PinnedConnector:
 
 # --- following a chain -------------------------------------------------------
 
-HopKind = Literal["start", "http", "meta_refresh", "script"]
-StopReason = Literal["done", "blocked", "too_many", "error", "loop", "not_http", "timeout"]
-
 _META_REFRESH = re.compile(
     rb"""<meta[^>]+http-equiv\s*=\s*["']?refresh["']?[^>]*content\s*=\s*["']?\s*\d*\s*;?\s*url\s*=\s*['"]?([^"'>\s]+)""",
     re.IGNORECASE,
@@ -213,29 +216,6 @@ _SCRIPT_REDIRECT = re.compile(
     rb"""|location\.(?:replace|assign)\(\s*["']([^"']+)["']""",
     re.IGNORECASE,
 )
-
-
-@dataclass(frozen=True, slots=True)
-class Hop:
-    url: str
-    kind: HopKind  # how we got here
-    status: int | None = None
-    ip: str | None = None
-
-
-@dataclass(frozen=True, slots=True)
-class RedirectChain:
-    hops: tuple[Hop, ...]
-    stopped: StopReason
-    detail: str = ""  # for blocked and error: what happened, in plain words
-
-    @property
-    def final(self) -> Hop:
-        return self.hops[-1]
-
-
-class Fetcher(Protocol):
-    async def follow(self, url: str) -> RedirectChain: ...
 
 
 @dataclass(frozen=True)
@@ -350,8 +330,3 @@ class SafeFetcher:
             target = (script.group(1) or script.group(2)).decode("latin-1")
             return result, join(url.href, target), "script"
         return result, None, "http"
-
-
-class UnconfiguredFetcher:
-    async def follow(self, url: str) -> RedirectChain:
-        raise RuntimeError("no fetcher is configured")

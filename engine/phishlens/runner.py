@@ -41,6 +41,7 @@ async def run_check[S](
     timeout: float = CHECK_TIMEOUT_SECONDS,
 ) -> list[Finding]:
     started = time.perf_counter()
+    timeout = getattr(check, "timeout", timeout)  # a check may need longer
     try:
         async with asyncio.timeout(timeout):
             findings = await check.run(subject, ctx)

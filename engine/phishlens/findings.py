@@ -6,14 +6,14 @@ so the verdict can always be explained. The verdict itself is calculated
 from the findings elsewhere; nothing here decides "phishing" on its own.
 """
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from enum import StrEnum
 from typing import Annotated, Literal, Protocol, Self
 
 import httpx
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
-from phishlens.services import Clock, DnsResolver, RdapClient
+from phishlens.services import Clock, DnsResolver, Fetcher, RdapClient, UnconfiguredFetcher
 
 # Dotted lower-case names such as "email.dmarc" (a check) or
 # "email.dmarc.fail" (a finding). At least two parts.
@@ -130,8 +130,10 @@ class CheckContext:
 
     dns: DnsResolver
     rdap: RdapClient
-    http: httpx.AsyncClient
+    http: httpx.AsyncClient  # for fixed, trusted API hosts only
     clock: Clock
+    # The only way to fetch a user-supplied URL (SSRF-guarded).
+    fetcher: Fetcher = field(default_factory=UnconfiguredFetcher)
 
 
 class Check[S](Protocol):

@@ -6,7 +6,7 @@ means the connector was never called (or never called for the bad address).
 
 import asyncio
 import ipaddress
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 
 import pytest
 
@@ -22,30 +22,9 @@ from phishlens.net.safe_fetch import (
 )
 from phishlens.services import RecordType
 from phishlens.url.parse import ParsedUrl, parse_url
-from tests.fakes import FakeDns
+from tests.fakes import FakeConnector, FakeDns, redirect
 
 PUBLIC = "93.184.215.14"
-
-
-@dataclass
-class FakeConnector:
-    """Answers from a script of {url: HttpResult}; 200 with no body otherwise."""
-
-    responses: dict[str, HttpResult] = field(default_factory=dict)
-    calls: list[tuple[str, str, str, int]] = field(
-        default_factory=list
-    )  # method, url, ip, max_bytes
-
-    async def request(
-        self, method: str, url: ParsedUrl, ip: IPAddress, timeout: float, max_bytes: int
-    ) -> HttpResult:
-        self.calls.append((method, url.href, str(ip), max_bytes))
-        result = self.responses.get(url.href, HttpResult(200, {"content-type": "text/plain"}, b""))
-        return HttpResult(result.status, result.headers, result.body[:max_bytes])
-
-
-def redirect(to: str, status: int = 302) -> HttpResult:
-    return HttpResult(status, {"location": to}, b"")
 
 
 def fetcher(dns: FakeDns | None = None, connector: FakeConnector | None = None) -> SafeFetcher:

@@ -6,7 +6,15 @@ from datetime import UTC, datetime
 import httpx
 
 from phishlens.findings import CheckContext
-from phishlens.services import DnsTemporaryError, RdapRecord, RecordType
+from phishlens.net.safe_fetch import HttpResult, IPAddress
+from phishlens.services import (
+    DnsTemporaryError,
+    Fetcher,
+    RdapRecord,
+    RecordType,
+    UnconfiguredFetcher,
+)
+from phishlens.url.parse import ParsedUrl
 
 
 @dataclass
@@ -59,6 +67,7 @@ def make_context(
     rdap: FakeRdap | None = None,
     http_handler: httpx.MockTransport | None = None,
     clock: FixedClock | None = None,
+    fetcher: Fetcher | None = None,
 ) -> CheckContext:
     """A context made only of fakes. The HTTP client refuses every request
     unless a MockTransport with canned responses is passed in."""
@@ -68,4 +77,25 @@ def make_context(
         rdap=rdap or FakeRdap(),
         http=httpx.AsyncClient(transport=transport),
         clock=clock or FixedClock(),
+        fetcher=fetcher or UnconfiguredFetcher(),
     )
+
+
+@dataclass
+class FakeConnector:
+    """Answers from a script of {url: HttpResult}; 200 with no body otherwise."""
+
+    responses: dict[str, HttpResult] = field(default_factory=dict)
+    # Every request made, as (method, url, ip, max_bytes).
+    calls: list[tuple[str, str, str, int]] = field(default_factory=list)
+
+    async def request(
+        self, method: str, url: ParsedUrl, ip: IPAddress, timeout: float, max_bytes: int
+    ) -> HttpResult:
+        self.calls.append((method, url.href, str(ip), max_bytes))
+        result = self.responses.get(url.href, HttpResult(200, {"content-type": "text/plain"}, b""))
+        return HttpResult(result.status, result.headers, result.body[:max_bytes])
+
+
+def redirect(to: str, status: int = 302) -> HttpResult:
+    return HttpResult(status, {"location": to}, b"")

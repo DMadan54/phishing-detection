@@ -118,3 +118,38 @@ class UnconfiguredDns:
 class UnconfiguredRdap:
     async def lookup_domain(self, domain: str) -> RdapRecord | None:
         raise ServiceNotConfiguredError("no RDAP client is configured")
+
+
+# --- following redirects -----------------------------------------------------
+# The real Fetcher is phishlens.net.safe_fetch.SafeFetcher.
+
+HopKind = Literal["start", "http", "meta_refresh", "script"]
+StopReason = Literal["done", "blocked", "too_many", "error", "loop", "not_http", "timeout"]
+
+
+@dataclass(frozen=True, slots=True)
+class Hop:
+    url: str
+    kind: HopKind  # how we got here
+    status: int | None = None
+    ip: str | None = None
+
+
+@dataclass(frozen=True, slots=True)
+class RedirectChain:
+    hops: tuple[Hop, ...]
+    stopped: StopReason
+    detail: str = ""  # for blocked and error: what happened, in plain words
+
+    @property
+    def final(self) -> Hop:
+        return self.hops[-1]
+
+
+class Fetcher(Protocol):
+    async def follow(self, url: str) -> RedirectChain: ...
+
+
+class UnconfiguredFetcher:
+    async def follow(self, url: str) -> RedirectChain:
+        raise ServiceNotConfiguredError("no fetcher is configured")
