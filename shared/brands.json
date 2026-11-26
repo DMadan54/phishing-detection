@@ -1,0 +1,72 @@
+{
+  "_comment": "Brands that phishing often impersonates. keywords are matched as whole words, case-insensitively, in display names and link text. domains are the brand's own domains; their subdomains count as the brand's too. Used by the engine and the extension.",
+  "brands": [
+    {
+      "name": "PayPal",
+      "keywords": ["paypal"],
+      "domains": ["paypal.com", "paypal.me", "paypalobjects.com"]
+    },
+    {
+      "name": "Microsoft",
+      "keywords": ["microsoft", "office 365", "microsoft 365", "onedrive", "sharepoint"],
+      "domains": [
+        "microsoft.com",
+        "microsoftonline.com",
+        "office.com",
+        "office365.com",
+        "outlook.com",
+        "live.com",
+        "sharepoint.com",
+        "onedrive.com"
+      ]
+    },
+    {
+      "name": "Apple",
+      "keywords": ["apple", "icloud", "itunes"],
+      "domains": ["apple.com", "icloud.com", "me.com"]
+    },
+    {
+      "name": "Google",
+      "keywords": ["google", "gmail"],
+      "domains": ["google.com", "gmail.com", "googlemail.com", "accounts.google.com"]
+    },
+    {
+      "name": "Amazon",
+      "keywords": ["amazon"],
+      "domains": [
+        "amazon.com",
+        "amazon.co.uk",
+        "amazon.de",
+        "amazon.fr",
+        "amazon.in",
+        "amazonaws.com",
+        "amazonses.com"
+      ]
+    },
+    {
+      "name": "DHL",
+      "keywords": ["dhl"],
+      "domains": ["dhl.com", "dhl.de", "dhl.co.uk"]
+    },
+    {
+      "name": "Royal Mail",
+      "keywords": ["royal mail"],
+      "domains": ["royalmail.com", "royalmail.co.uk"]
+    },
+    {
+      "name": "Netflix",
+      "keywords": ["netflix"],
+      "domains": ["netflix.com"]
+    },
+    {
+      "name": "HMRC",
+      "keywords": ["hmrc"],
+      "domains": ["hmrc.gov.uk", "gov.uk"]
+    },
+    {
+      "name": "DocuSign",
+      "keywords": ["docusign"],
+      "domains": ["docusign.com", "docusign.net"]
+    }
+  ]
+}

@@ -8,6 +8,8 @@ dependencies = [
     "dnspython>=2.7",
     "fastapi>=0.115",
     "httpx>=0.27",
+    "idna>=3.7",
+    "publicsuffixlist>=1.0",
     "pydantic>=2.9",
     "uvicorn>=0.32",
 ]
@@ -18,3 +20,9 @@ build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
 packages = ["phishlens"]
+
+# The shared lists live outside the package so the extension can use them
+# too; a built wheel carries copies.
+[tool.hatch.build.targets.wheel.force-include]
+"../shared/brands.json" = "phishlens/data/brands.json"
+"../shared/shorteners.json" = "phishlens/data/shorteners.json"

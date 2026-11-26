@@ -1,0 +1,23 @@
+{
+  "_comment": "URL shortener hosts. A short link hides where it really goes, so it is supporting evidence, not proof: plenty of legitimate mail uses them. Used by the engine and the extension.",
+  "hosts": [
+    "bit.ly",
+    "bl.ink",
+    "buff.ly",
+    "cutt.ly",
+    "goo.gl",
+    "is.gd",
+    "lnkd.in",
+    "ow.ly",
+    "qrco.de",
+    "rb.gy",
+    "rebrand.ly",
+    "s.id",
+    "shorturl.at",
+    "t.co",
+    "t.ly",
+    "tiny.cc",
+    "tinyurl.com",
+    "v.gd"
+  ]
+}
