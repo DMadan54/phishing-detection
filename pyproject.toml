@@ -51,8 +51,9 @@ select = [
 ]
 
 [tool.ruff.lint.per-file-ignores]
-# Tests use plain assert, which bandit flags because asserts vanish under -O.
-"engine/tests/**" = ["S101"]
+# Tests use plain assert, which bandit flags because asserts vanish under -O,
+# and seeded (non-cryptographic) random numbers to fuzz the checks.
+"engine/tests/**" = ["S101", "S311"]
 
 # --- mypy ------------------------------------------------------------------
 
