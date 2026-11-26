@@ -87,4 +87,6 @@ addopts = ["-m", "not live", "--strict-markers"]
 filterwarnings = [
     # pyspf has an unescaped backslash in a docstring; harmless, not ours.
     "ignore:invalid escape sequence:SyntaxWarning",
+    # oletools still uses old pyparsing names; harmless, not ours.
+    "ignore::DeprecationWarning:oletools.*",
 ]

@@ -329,13 +329,31 @@ def _urls_in_text(text: str) -> list[str]:
     return [m.group().rstrip(".,;:!?") for m in _TEXT_URL.finditer(text)]
 
 
+# Executable formats are checked by their magic numbers first. They matter
+# most, and puremagic ranks some Windows executable headers below obscure
+# formats that share the first bytes.
+_EXECUTABLE_MAGIC = (
+    (b"MZ", "application/vnd.microsoft.portable-executable"),  # Windows (DOS/PE header)
+    (bytes.fromhex("7f454c46"), "application/x-elf"),  # Linux: 0x7f "ELF"
+    (bytes.fromhex("cffaedfe"), "application/x-mach-binary"),  # macOS, 64-bit
+    (bytes.fromhex("cefaedfe"), "application/x-mach-binary"),  # macOS, 32-bit
+    (bytes.fromhex("cafebabe"), "application/x-mach-binary"),  # macOS universal (or Java class)
+)
+
+
 def _sniff(data: bytes) -> str | None:
+    """What the bytes look like, as a media type, or None if unknown."""
     if not data:
         return None
+    for magic, media_type in _EXECUTABLE_MAGIC:
+        if data.startswith(magic):
+            return media_type
     try:
-        return puremagic.from_string(data, mime=True) or None
+        guess = puremagic.from_string(data, mime=True)
     except (puremagic.PureError, ValueError):
         return None
+    # "application/octet-stream" means "some bytes": no information.
+    return guess if guess and guess != "application/octet-stream" else None
 
 
 class _HtmlScan(HTMLParser):

@@ -8,6 +8,7 @@ naming it in PHISHLENS_DISABLED_CHECKS (comma-separated), for example
 from collections.abc import Iterable
 from dataclasses import dataclass
 
+from phishlens.email.attachments import AttachmentCheck
 from phishlens.email.auth_dkim import DkimCheck
 from phishlens.email.auth_dmarc import DmarcCheck
 from phishlens.email.auth_results import AuthResultsCheck
@@ -17,6 +18,8 @@ from phishlens.email.dates import DateCheck
 from phishlens.email.forwarding import ForwardingCheck
 from phishlens.email.from_check import FromCheck
 from phishlens.email.headers import HeaderConsistencyCheck
+from phishlens.email.language import LanguageCheck
+from phishlens.email.links import LinkCheck
 from phishlens.email.parse import ParsedEmail
 from phishlens.findings import Check
 from phishlens.lookalike import NoLookalikes
@@ -81,6 +84,9 @@ def default_registry(email_config: EmailConfig | None = None) -> Registry:
             FromCheck(NoLookalikes()),  # the real detector arrives with the URL checks
             HeaderConsistencyCheck(),
             DateCheck(config),
+            LinkCheck(),
+            AttachmentCheck(),
+            LanguageCheck(),
         ),
         url_checks=(),
     )
