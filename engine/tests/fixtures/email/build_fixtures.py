@@ -78,6 +78,10 @@ def zip_bytes(files: dict[str, bytes]) -> bytes:
     with zipfile.ZipFile(buffer, "w", zipfile.ZIP_STORED) as archive:
         for name, data in files.items():
             info = zipfile.ZipInfo(name, date_time=(2026, 1, 5, 10, 0, 0))
+            # zipfile records the OS that made each entry (0 on Windows, 3 on
+            # Linux). Fixing it keeps the bytes, and the DKIM signatures over
+            # them, the same on every machine.
+            info.create_system = 0
             archive.writestr(info, data)
     return buffer.getvalue()
 
