@@ -1,31 +1,49 @@
 """Domain helpers: normalising hosts and working out who owns a domain.
 
-The "organisational domain" is the part of a name someone actually
-registered: mail.paypal.com and paypal.com both belong to paypal.com, but
-a.co.uk and b.co.uk belong to different people. The Public Suffix List says
-where the registrable part starts. publicsuffixlist ships a copy of it, so
-nothing is downloaded at runtime (the copy is updated by upgrading the
-package).
+The "registrable domain" (DMARC calls it the organisational domain) is the
+part of a name someone actually registered: mail.paypal.com and paypal.com
+both belong to paypal.com, but a.co.uk and b.co.uk belong to different
+people, and login.microsoft.com.evil.example belongs to evil.example. The
+Public Suffix List says where the registrable part starts.
 
-The full list is used, including private suffixes such as github.io, so
-alice.github.io and mallory.github.io count as different owners.
+tldextract ships a snapshot of that list. It's configured here to never
+download a fresh copy and never write a cache, so results only change when
+the pinned tldextract version is upgraded. Private suffixes such as
+github.io are included, so alice.github.io and mallory.github.io count as
+different owners.
 
-DMARC (RFC 7489) defines alignment with exactly this organisational domain.
+The list's own algorithm has a default rule: a TLD that isn't on the list
+counts as a one-label suffix. tldextract leaves such names without a
+registrable domain, so that rule is applied here. It matters for real new
+TLDs as well as the reserved .example and .test names the tests use.
 """
 
 import ipaddress
+from dataclasses import dataclass
 from functools import cache
 from typing import Literal
 
 import idna
-from publicsuffixlist import PublicSuffixList
+import tldextract
 
 AlignmentMode = Literal["relaxed", "strict"]
 
 
+@dataclass(frozen=True, slots=True)
+class DomainParts:
+    subdomain: str  # "login.microsoft.com" (may be empty)
+    label: str  # the registered name without its suffix: "evil"
+    suffix: str  # "example", "co.uk"
+    registrable: str  # "evil.example"; equal to the input for a bare suffix
+
+
 @cache
-def _psl() -> PublicSuffixList:
-    return PublicSuffixList()
+def _extractor() -> tldextract.TLDExtract:
+    return tldextract.TLDExtract(
+        suffix_list_urls=(),  # never download
+        cache_dir=None,  # never write a cache
+        include_psl_private_domains=True,
+    )
 
 
 def normalise_domain(name: str) -> str | None:
@@ -43,12 +61,29 @@ def normalise_domain(name: str) -> str | None:
         return None
 
 
-def org_domain(domain: str) -> str:
-    """The registrable domain: "mail.paypal.com" -> "paypal.com".
+@cache
+def split_domain(domain: str) -> DomainParts:
+    """Split a normalised domain into subdomain, label and suffix."""
+    domain = domain.lower().rstrip(".")
+    if as_ip(domain):
+        return DomainParts("", domain, "", domain)
+    result = _extractor()(domain)
+    if result.suffix and result.domain:
+        return DomainParts(
+            result.subdomain, result.domain, result.suffix, f"{result.domain}.{result.suffix}"
+        )
+    labels = domain.split(".")
+    if result.suffix:  # the whole name is a public suffix, such as "co.uk"
+        return DomainParts("", "", result.suffix, domain)
+    if len(labels) < 2:
+        return DomainParts("", domain, "", domain)
+    # The list's default rule: an unknown TLD is a one-label suffix.
+    return DomainParts(".".join(labels[:-2]), labels[-2], labels[-1], ".".join(labels[-2:]))
 
-    A name that is itself a public suffix (like "co.uk") is returned as is.
-    """
-    return _psl().privatesuffix(domain) or domain
+
+def org_domain(domain: str) -> str:
+    """The registrable domain: "mail.paypal.com" -> "paypal.com"."""
+    return split_domain(domain).registrable
 
 
 def aligned(a: str, b: str, mode: AlignmentMode = "relaxed") -> bool:

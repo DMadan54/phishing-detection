@@ -7,6 +7,7 @@ from phishlens.domains import (
     domain_of_address,
     normalise_domain,
     org_domain,
+    split_domain,
 )
 
 
@@ -34,10 +35,29 @@ def test_normalise_domain(name: str, expected: str | None) -> None:
         ("co.uk", "co.uk"),
         ("alice.github.io", "alice.github.io"),
         ("paypal.com.evil.test", "evil.test"),
+        ("login.microsoft.com.evil.example", "evil.example"),
+        ("amazon.co.uk", "amazon.co.uk"),
+        ("xn--mnchen-3ya.de", "xn--mnchen-3ya.de"),
+        ("192.0.2.1", "192.0.2.1"),
     ],
 )
 def test_org_domain(domain: str, expected: str) -> None:
     assert org_domain(domain) == expected
+
+
+def test_split_domain() -> None:
+    parts = split_domain("login.microsoft.com.evil.example")
+    assert (parts.subdomain, parts.label, parts.suffix) == (
+        "login.microsoft.com",
+        "evil",
+        "example",
+    )
+    assert split_domain("accounts.google.com").label == "google"
+
+
+def test_extractor_never_touches_the_network() -> None:
+    # The autouse network guard would raise if tldextract tried to download.
+    assert split_domain("brand-new-name.co.uk").registrable == "brand-new-name.co.uk"
 
 
 def test_relaxed_alignment_allows_subdomains() -> None:
