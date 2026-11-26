@@ -1,5 +1,9 @@
 """Who the message says it's from, and whether that holds together.
 
+The lookalike-domain rules are shared with the URL checks
+(phishlens.url.lookalike), so a sender at paypa1.com and a link to
+paypa1.com are judged the same way.
+
 Most people only read the display name ("PayPal Service"), not the address
 after it. So a display name that names a brand, or contains an email address
 of its own, while the real address is somewhere else, is a cheap and very
@@ -13,8 +17,8 @@ from phishlens.brands import brands_named_in
 from phishlens.domains import domain_of_address, same_owner
 from phishlens.email import evidence
 from phishlens.email.parse import Address, ParsedEmail
-from phishlens.findings import CheckContext, Finding, Severity
-from phishlens.lookalike import LookalikeDetector, NoLookalikes
+from phishlens.findings import CheckContext, Finding, HeaderEvidence, LookalikeEvidence, Severity
+from phishlens.url.lookalike import LookalikeDetector, default_detector
 
 _ADDRESS_IN_TEXT = re.compile(r"[\w.+'-]+@[\w-]+(?:\.[\w-]+)+")
 _BRACKETED = re.compile(r"<\s*([^<>\s]+@[^<>\s]+)\s*>")
@@ -22,7 +26,7 @@ _BRACKETED = re.compile(r"<\s*([^<>\s]+@[^<>\s]+)\s*>")
 
 @dataclass(frozen=True)
 class FromCheck:
-    lookalikes: LookalikeDetector = field(default_factory=NoLookalikes)
+    lookalikes: LookalikeDetector = field(default_factory=default_detector)
     name: str = "email.from"
 
     async def run(self, msg: ParsedEmail, ctx: CheckContext) -> list[Finding]:
@@ -117,16 +121,25 @@ class FromCheck:
                 "lookalike",
                 Severity.HIGH,
                 f"The sender's domain imitates {match.brand.name}",
-                f"The address is at {match.domain}, which looks like a {match.brand.name} "
-                f"domain but isn't one: it {match.reason}.",
+                f"The address is at {match.domain_unicode}, which looks like {match.genuine} "
+                f"({match.brand.name}) but isn't: it {match.reason}. A lookalike domain can "
+                "pass SPF, DKIM and DMARC for itself, so those checks can't catch this.",
                 msg,
+                match.evidence(),
             )
         ]
 
     def _finding(
-        self, what: str, severity: Severity, title: str, explanation: str, msg: ParsedEmail
+        self,
+        what: str,
+        severity: Severity,
+        title: str,
+        explanation: str,
+        msg: ParsedEmail,
+        *extra: LookalikeEvidence,
     ) -> Finding:
-        proof = tuple(evidence.from_field(f) for f in msg.headers_named("From"))
+        headers = tuple(evidence.from_field(f) for f in msg.headers_named("From"))
+        proof: tuple[HeaderEvidence | LookalikeEvidence, ...] = (*headers, *extra)
         return Finding(
             id=f"{self.name}.{what}",
             check=self.name,

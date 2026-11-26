@@ -87,9 +87,28 @@ class BodyEvidence(_Frozen):
     span: Span | None = None
 
 
+class CharacterDifference(_Frozen):
+    """One place where a lookalike name differs from the genuine one."""
+
+    position: int = Field(ge=0)  # index into LookalikeEvidence.seen
+    seen: str
+    genuine: str
+    description: str  # e.g. "CYRILLIC SMALL LETTER A instead of LATIN SMALL LETTER A"
+
+
+class LookalikeEvidence(_Frozen):
+    """Two domains side by side, so the report can show what differs."""
+
+    kind: Literal["lookalike"] = "lookalike"
+    seen: str  # as a person would see it, in Unicode
+    seen_ascii: str  # as DNS sees it: "xn--pypal-4ve.com"
+    genuine: str  # the domain being imitated: "paypal.com"
+    differences: tuple[CharacterDifference, ...] = ()
+
+
 # The "kind" field tells pydantic which class to build when reading JSON.
 Evidence = Annotated[
-    HeaderEvidence | UrlEvidence | PageEvidence | BodyEvidence,
+    HeaderEvidence | UrlEvidence | PageEvidence | BodyEvidence | LookalikeEvidence,
     Field(discriminator="kind"),
 ]
 

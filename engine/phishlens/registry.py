@@ -22,7 +22,6 @@ from phishlens.email.language import LanguageCheck
 from phishlens.email.links import LinkCheck
 from phishlens.email.parse import ParsedEmail
 from phishlens.findings import Check
-from phishlens.lookalike import NoLookalikes
 from phishlens.subjects import RawUrl
 
 
@@ -81,7 +80,7 @@ def default_registry(email_config: EmailConfig | None = None) -> Registry:
             DmarcCheck(config),
             AuthResultsCheck(config),
             ForwardingCheck(),
-            FromCheck(NoLookalikes()),  # the real detector arrives with the URL checks
+            FromCheck(),
             HeaderConsistencyCheck(),
             DateCheck(config),
             LinkCheck(),

@@ -10,19 +10,26 @@ from phishlens.email.from_check import FromCheck
 from phishlens.email.headers import HeaderConsistencyCheck
 from phishlens.email.parse import ParsedEmail, parse_email
 from phishlens.findings import Check, Severity
-from phishlens.lookalike import LookalikeMatch
+from phishlens.url.lookalike import LookalikeMatch, NoLookalikes
 from tests.email_checks import findings_for, ids_for
 from tests.fakes import FixedClock, make_context
 
 
 class FakeLookalikes:
-    """Stands in for the real detector (URL and domain milestone)."""
+    """Flags only paypa1.test, so these tests don't depend on the brand list."""
 
     def check(self, domain: str) -> LookalikeMatch | None:
         if domain != "paypa1.test":
             return None
         paypal = next(b for b in load_brands() if b.name == "PayPal")
-        return LookalikeMatch(paypal, domain, 'uses "1" in place of "l" in paypal')
+        return LookalikeMatch(
+            rule="character_swap",
+            brand=paypal,
+            domain=domain,
+            domain_unicode=domain,
+            genuine="paypal.com",
+            reason='uses "1" in place of "l"',
+        )
 
 
 IDENTITY_CHECKS: list[Check[ParsedEmail]] = [
@@ -80,8 +87,15 @@ def test_every_id_has_a_positive_and_a_negative() -> None:
         assert any(finding_id not in ids for ids in EXPECTED.values()), finding_id
 
 
-async def test_real_detector_default_finds_no_lookalikes_yet() -> None:
-    assert await ids_for("lookalike_sender", [FromCheck()]) == {"email.from.display_name_brand"}
+async def test_real_detector_flags_the_lookalike_sender() -> None:
+    findings = await findings_for("lookalike_sender", [FromCheck()])
+    lookalike = next(f for f in findings if f.id == "email.from.lookalike")
+    assert "paypal.com" in lookalike.explanation and "paypa1.test" in lookalike.explanation
+
+
+async def test_no_lookalikes_detector_finds_none() -> None:
+    ids = await ids_for("lookalike_sender", [FromCheck(NoLookalikes())])
+    assert ids == {"email.from.display_name_brand"}
 
 
 async def test_mailing_list_reply_to_is_lowered() -> None:

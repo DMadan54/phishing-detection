@@ -80,3 +80,17 @@ These read only the URL text, parsed with the WHATWG URL Standard (the rules bro
 | `url.brand.in_path` | MEDIUM with a sign-in word in the path, otherwise LOW | A brand keyword appears in the path on someone else's domain. | Fake sign-in pages are often at `/paypal/login`. | News, reviews and support forums that mention brands. |
 | `url.tld.suspicious` | LOW | The TLD is in `shared/suspicious-tlds.json` (sources and date in the file). | These TLDs are heavily over-represented in phishing. | Most sites on them are legitimate. |
 | `url.port.non_standard` | LOW | An explicit port other than 80 or 443. | Often a temporary or hand-run server. | Development servers and some self-hosted services. |
+
+## URL: lookalikes and international names
+
+The same rules judge sender domains (`email.from.lookalike`) and link domains. Domains that belong to the brand, and domains in the popular set (the Tranco top 10k from `scripts/fetch_tranco.py`, if downloaded), are never flagged. `shared/test-vectors/lookalike.json` lists the expected result for every rule, including the legitimate cases.
+
+| Finding id | Severity | What it means | Why it matters | Known false positives |
+|------------|----------|---------------|----------------|-----------------------|
+| `url.lookalike.homograph` | CRITICAL | A non-ASCII name with the same Unicode TR39 skeleton as a brand label (`paypal` spelled with a Cyrillic `a`). Evidence shows both domains and names each different character. | Looks identical to the reader; nobody registers it by accident. | Practically none. |
+| `url.lookalike.character_swap` | HIGH | An ASCII name with the same skeleton as a brand: digits or letter pairs that look like letters (`paypa1`, `rnicrosoft`, `g00gle`). | Easy to misread at a glance. | Rare; legitimate names that happen to share a skeleton with a brand. |
+| `url.lookalike.tld_swap` | HIGH | The brand's exact name under another TLD (`paypal.co`). | Looks right except for the ending most people don't check. | Country domains a brand really owns but `brands.json` doesn't list; the popular set covers most. |
+| `url.lookalike.typo` | HIGH | One edit from a brand label (two for 9+ letters), counting a swap of neighbouring letters as one; keyboard-neighbour mistakes are named. | Catches people who mistype, and readers who don't notice. | Real words or names one letter from a brand (`chose` and `chase`); brands under 5 letters are skipped for this reason. |
+| `url.lookalike.combo` | MEDIUM | The brand name plus a hyphenated word or a sign-in word (`paypal-secure-login`, `securepaypal`). | Looks like an official service page. | Fan sites, resellers and support businesses that use brand names. |
+| `url.idn.mixed_script` | HIGH | One label mixes scripts (Latin with Cyrillic or Greek, for example). Latin with Han, kana, Hangul or Bopomofo is allowed, as UTS #39 allows. | Real names almost never mix alphabets within a word. | Some brand-plus-word names in other languages. |
+| `url.idn.punycode` | INFO | The name is internationalised; shows both the stored `xn--` form and the displayed form. | Lets the reader see exactly what the name is. | None (informational). |

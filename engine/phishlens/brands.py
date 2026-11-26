@@ -20,7 +20,7 @@ class Brand:
     name: str
     keywords: tuple[str, ...]
     labels: tuple[str, ...]  # registered names lookalike detection compares against
-    domains: frozenset[str]
+    domains: tuple[str, ...]  # in the brand's own order, main domain first
 
     def owns(self, domain: str) -> bool:
         """True for the brand's own domains and their subdomains.
@@ -48,7 +48,7 @@ def load_brands() -> tuple[Brand, ...]:
             name=entry["name"],
             keywords=tuple(k.lower() for k in entry["keywords"]),
             labels=tuple(label.lower() for label in entry.get("labels", [])),
-            domains=frozenset(d for d in map(normalise_domain, entry["domains"]) if d),
+            domains=tuple(dict.fromkeys(d for d in map(normalise_domain, entry["domains"]) if d)),
         )
         for entry in read_shared("brands.json")["brands"]
     )

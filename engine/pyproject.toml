@@ -33,3 +33,6 @@ packages = ["phishlens"]
 "../shared/brands.json" = "phishlens/data/brands.json"
 "../shared/shorteners.json" = "phishlens/data/shorteners.json"
 "../shared/suspicious-tlds.json" = "phishlens/data/suspicious-tlds.json"
+"../shared/unicode/confusables.txt" = "phishlens/data/unicode/confusables.txt"
+"../shared/unicode/Scripts.txt" = "phishlens/data/unicode/Scripts.txt"
+"../shared/unicode/license.txt" = "phishlens/data/unicode/license.txt"

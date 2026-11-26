@@ -10,10 +10,15 @@ local socket pair.
 """
 
 import ipaddress
+import os
 import socket
 from typing import Any
 
 import pytest
+
+# Tests must give the same results whether or not the optional Tranco list
+# (scripts/fetch_tranco.py) has been downloaded on this machine.
+os.environ["PHISHLENS_POPULAR_DOMAINS"] = ""
 
 
 class NetworkBlockedError(RuntimeError):

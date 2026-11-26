@@ -1,0 +1,290 @@
+{
+  "_comment": "Lookalike-domain test vectors shared by the engine (engine/tests/test_url_lookalike.py) and the browser extension. Both must give exactly these results. 'popular' is the known-popular set to use while running them (it stands in for the Tranco top 10k). Non-ASCII characters are written as backslash-u escapes on purpose, so they can't be mistaken for the letters they imitate.",
+  "popular": [
+    "google.de",
+    "google.fr",
+    "amazon.com.mx"
+  ],
+  "lookalike": [
+    {
+      "domain": "xn--pypal-4ve.com",
+      "expect": {
+        "rule": "homograph",
+        "brand": "PayPal"
+      },
+      "why": "Cyrillic a, in punycode form"
+    },
+    {
+      "domain": "p\u0430ypal.com",
+      "expect": {
+        "rule": "homograph",
+        "brand": "PayPal"
+      },
+      "why": "Cyrillic a, as a person sees it"
+    },
+    {
+      "domain": "\u0430\u0440\u0440\u04cf\u0435.com",
+      "expect": {
+        "rule": "homograph",
+        "brand": "Apple"
+      },
+      "why": "every letter Cyrillic"
+    },
+    {
+      "domain": "paypa1.com",
+      "expect": {
+        "rule": "character_swap",
+        "brand": "PayPal"
+      },
+      "why": "digit 1 for letter l"
+    },
+    {
+      "domain": "rnicrosoft.com",
+      "expect": {
+        "rule": "character_swap",
+        "brand": "Microsoft"
+      },
+      "why": "rn for m"
+    },
+    {
+      "domain": "arnazon.com",
+      "expect": {
+        "rule": "character_swap",
+        "brand": "Amazon"
+      },
+      "why": "rn for m"
+    },
+    {
+      "domain": "g00gle.com",
+      "expect": {
+        "rule": "character_swap",
+        "brand": "Google"
+      },
+      "why": "zeros for o"
+    },
+    {
+      "domain": "faceb00k.com",
+      "expect": {
+        "rule": "character_swap",
+        "brand": "Facebook"
+      },
+      "why": "zeros for o"
+    },
+    {
+      "domain": "paypla.com",
+      "expect": {
+        "rule": "typo",
+        "brand": "PayPal"
+      },
+      "why": "two neighbouring letters swapped"
+    },
+    {
+      "domain": "paypall.com",
+      "expect": {
+        "rule": "typo",
+        "brand": "PayPal"
+      },
+      "why": "an extra letter"
+    },
+    {
+      "domain": "netflx.com",
+      "expect": {
+        "rule": "typo",
+        "brand": "Netflix"
+      },
+      "why": "a missing letter"
+    },
+    {
+      "domain": "paypak.com",
+      "expect": {
+        "rule": "typo",
+        "brand": "PayPal"
+      },
+      "why": "a key next to l on the keyboard"
+    },
+    {
+      "domain": "bankofamerca.com",
+      "expect": {
+        "rule": "typo",
+        "brand": "Bank of America"
+      },
+      "why": "long name, one letter missing"
+    },
+    {
+      "domain": "paypal-secure-login.com",
+      "expect": {
+        "rule": "combo",
+        "brand": "PayPal"
+      },
+      "why": "brand plus hyphenated words"
+    },
+    {
+      "domain": "securepaypal.com",
+      "expect": {
+        "rule": "combo",
+        "brand": "PayPal"
+      },
+      "why": "brand joined to a sign-in word"
+    },
+    {
+      "domain": "paypal.co",
+      "expect": {
+        "rule": "tld_swap",
+        "brand": "PayPal"
+      },
+      "why": ".co for .com"
+    },
+    {
+      "domain": "netflix.xyz",
+      "expect": {
+        "rule": "tld_swap",
+        "brand": "Netflix"
+      },
+      "why": "another TLD"
+    },
+    {
+      "domain": "paypa1.com.evil.example",
+      "expect": null,
+      "why": "the registrable domain is evil.example; the lexical brand check handles this"
+    },
+    {
+      "domain": "paypal.com",
+      "expect": null,
+      "why": "the brand's own domain"
+    },
+    {
+      "domain": "www.paypal.com",
+      "expect": null,
+      "why": "a subdomain of the brand's own domain"
+    },
+    {
+      "domain": "paypalobjects.com",
+      "expect": null,
+      "why": "another of the brand's own domains"
+    },
+    {
+      "domain": "accounts.google.com",
+      "expect": null,
+      "why": "legitimate subdomain"
+    },
+    {
+      "domain": "login.microsoftonline.com",
+      "expect": null,
+      "why": "legitimate Microsoft sign-in domain"
+    },
+    {
+      "domain": "amazon.co.uk",
+      "expect": null,
+      "why": "legitimate country domain"
+    },
+    {
+      "domain": "google.de",
+      "expect": null,
+      "why": "popular, so not a lookalike even though it isn't in brands.json"
+    },
+    {
+      "domain": "xn--mnchen-3ya.de",
+      "expect": null,
+      "why": "a real internationalised domain (m\u00fcnchen.de)"
+    },
+    {
+      "domain": "b\u00fccher.de",
+      "expect": null,
+      "why": "a real internationalised domain"
+    },
+    {
+      "domain": "applebees.com",
+      "expect": null,
+      "why": "contains a brand name but is a different word"
+    },
+    {
+      "domain": "pineapple.com",
+      "expect": null,
+      "why": "contains a brand name inside another word"
+    },
+    {
+      "domain": "paypalace.com",
+      "expect": null,
+      "why": "brand plus a non-sign-in word is not a combo"
+    },
+    {
+      "domain": "example.com",
+      "expect": null,
+      "why": "unrelated"
+    },
+    {
+      "domain": "github.io",
+      "expect": null,
+      "why": "a public suffix, not a registrable domain"
+    }
+  ],
+  "skeleton": [
+    {
+      "a": "paypal",
+      "b": "p\u0430ypal",
+      "same": true
+    },
+    {
+      "a": "paypal",
+      "b": "paypa1",
+      "same": true
+    },
+    {
+      "a": "microsoft",
+      "b": "rnicrosoft",
+      "same": true
+    },
+    {
+      "a": "google",
+      "b": "g00gle",
+      "same": true
+    },
+    {
+      "a": "paypal",
+      "b": "paypai",
+      "same": false
+    },
+    {
+      "a": "m\u00fcnchen",
+      "b": "munchen",
+      "same": false
+    }
+  ],
+  "mixed_script": [
+    {
+      "label": "p\u0430ypal",
+      "mixed": true,
+      "why": "Latin and Cyrillic"
+    },
+    {
+      "label": "\u0430\u0440\u0440\u04cf\u0435",
+      "mixed": false,
+      "why": "all Cyrillic: a homograph, but not mixed"
+    },
+    {
+      "label": "m\u00fcnchen",
+      "mixed": false,
+      "why": "Latin with a diacritic"
+    },
+    {
+      "label": "\u6771\u4eactokyo",
+      "mixed": false,
+      "why": "Han with Latin is allowed (Japanese)"
+    },
+    {
+      "label": "\u65e5\u672c\u8a9e",
+      "mixed": false,
+      "why": "Han only"
+    },
+    {
+      "label": "paypal-1",
+      "mixed": false,
+      "why": "digits and hyphens don't count"
+    },
+    {
+      "label": "g\u03bf\u03bfgle",
+      "mixed": true,
+      "why": "Latin and Greek omicron"
+    }
+  ]
+}
