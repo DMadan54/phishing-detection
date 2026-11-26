@@ -52,8 +52,9 @@ select = [
 
 [tool.ruff.lint.per-file-ignores]
 # Tests use plain assert, which bandit flags because asserts vanish under -O,
-# and seeded (non-cryptographic) random numbers to fuzz the checks.
-"engine/tests/**" = ["S101", "S311"]
+# seeded (non-cryptographic) random numbers to fuzz the checks, and
+# addresses like 0.0.0.0 as data the SSRF guard must refuse, not to bind to.
+"engine/tests/**" = ["S101", "S104", "S311"]
 
 # --- mypy ------------------------------------------------------------------
 
