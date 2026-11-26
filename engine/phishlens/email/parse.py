@@ -49,6 +49,7 @@ class HeaderField:
     name: str
     value: str  # decoded, unfolded
     span: Span | None  # where the whole header sits in the raw bytes
+    raw: str = ""  # unfolded but not decoded: exactly what the sender wrote
 
 
 @dataclass(frozen=True, slots=True)
@@ -195,7 +196,14 @@ def _headers(msg: EmailMessage, raw: bytes, defects: list[str]) -> tuple[HeaderF
             defects.append(f"HeaderParseError:{name}")
         candidates = spans.get(key, [])
         span = candidates[index] if index < len(candidates) else None
-        fields.append(HeaderField(name=name, value=" ".join(value.split()), span=span))
+        fields.append(
+            HeaderField(
+                name=name,
+                value=" ".join(value.split()),
+                span=span,
+                raw=" ".join(str(raw_value).split()),
+            )
+        )
     return tuple(fields)
 
 

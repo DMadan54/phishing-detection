@@ -297,11 +297,12 @@ def lookalike_sender() -> bytes:
 
 def display_name_spoof() -> bytes:
     """The display name is an address (PayPal's); the real one is not.
-    random.test publishes no SPF and no DMARC."""
+    random.test publishes no SPF and no DMARC, and the Message-ID comes from
+    an unrelated bulk-mail host."""
     raw = message(
         [
             *basic_headers(
-                '"service@paypal.com" <billing@random.test>', "Invoice", "i1@random.test"
+                '"service@paypal.com" <billing@random.test>', "Invoice", "7f3a9c@bulk-mailer.test"
             ),
             ("Content-Type", "text/plain; charset=utf-8"),
         ],

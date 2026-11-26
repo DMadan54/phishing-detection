@@ -6,7 +6,7 @@ From: "service@paypal.com" <billing@random.test>
 To: you@recipient.example
 Subject: Invoice
 Date: Mon, 05 Jan 2026 10:00:00 +0000
-Message-ID: <i1@random.test>
+Message-ID: <7f3a9c@bulk-mailer.test>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=utf-8
 

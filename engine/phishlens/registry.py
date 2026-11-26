@@ -13,9 +13,13 @@ from phishlens.email.auth_dmarc import DmarcCheck
 from phishlens.email.auth_results import AuthResultsCheck
 from phishlens.email.auth_spf import SpfCheck
 from phishlens.email.config import EmailConfig
+from phishlens.email.dates import DateCheck
 from phishlens.email.forwarding import ForwardingCheck
+from phishlens.email.from_check import FromCheck
+from phishlens.email.headers import HeaderConsistencyCheck
 from phishlens.email.parse import ParsedEmail
 from phishlens.findings import Check
+from phishlens.lookalike import NoLookalikes
 from phishlens.subjects import RawUrl
 
 
@@ -74,6 +78,9 @@ def default_registry(email_config: EmailConfig | None = None) -> Registry:
             DmarcCheck(config),
             AuthResultsCheck(config),
             ForwardingCheck(),
+            FromCheck(NoLookalikes()),  # the real detector arrives with the URL checks
+            HeaderConsistencyCheck(),
+            DateCheck(config),
         ),
         url_checks=(),
     )
