@@ -13,7 +13,15 @@ from typing import Annotated, Literal, Protocol, Self
 import httpx
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
-from phishlens.services import Clock, DnsResolver, Fetcher, RdapClient, UnconfiguredFetcher
+from phishlens.services import (
+    Clock,
+    CtClient,
+    DnsResolver,
+    Fetcher,
+    RdapClient,
+    UnconfiguredCt,
+    UnconfiguredFetcher,
+)
 
 # Dotted lower-case names such as "email.dmarc" (a check) or
 # "email.dmarc.fail" (a finding). At least two parts.
@@ -134,6 +142,7 @@ class CheckContext:
     clock: Clock
     # The only way to fetch a user-supplied URL (SSRF-guarded).
     fetcher: Fetcher = field(default_factory=UnconfiguredFetcher)
+    ct: CtClient = field(default_factory=UnconfiguredCt)
 
 
 class Check[S](Protocol):

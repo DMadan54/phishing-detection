@@ -109,3 +109,17 @@ Only `/analyse/url` follows redirects (pass `"follow_redirects": false` to skip 
 | `url.redirect.blocked` | MEDIUM | A hop pointed at a non-public address (private, loopback, link-local, metadata and so on) and was refused. | Public links have no reason to point inside a network; may be an SSRF attempt. | Links to intranet sites in internal mail. |
 | `url.redirect.too_many` | MEDIUM | More than 10 hops, or a loop. | Long chains wear scanners down. | Broken site configurations. |
 | `url.redirect.error` | INFO | The chain couldn't be followed to the end (DNS failure, timeout, connection or TLS error, a non-web link). | The other checks still apply to the address itself. | Sites that are simply down. |
+
+## URL: age, certificates and reputation
+
+These ask outside services about the domain, never the site itself. Brand-owned and popular domains are skipped. Any failure is reported as unknown, never as clean.
+
+| Finding id | Severity | What it means | Why it matters | Known false positives |
+|------------|----------|---------------|----------------|-----------------------|
+| `url.age.new` | HIGH under 7 days, MEDIUM under 30 days | RDAP says the registrable domain was registered recently ("Registered 3 days ago"). | Phishing domains are registered just before use and dropped within days. | New businesses, campaigns and product launches. |
+| `url.age.unknown` | INFO | No RDAP server for the TLD (for example .de, .io and .co have none in IANA's bootstrap file), the registry didn't answer, or it gave no registration date. | The age signal is missing; nothing is assumed. | None (informational). |
+| `url.ct.first_seen_recent` | MEDIUM | The domain's first TLS certificate in the certificate-transparency logs (via crt.sh) is under 7 days old. | That's usually when the site went live. | New sites of any kind. |
+| `url.ct.unknown` | INFO | crt.sh couldn't be searched (timeout, rate limit, too much history to read) or logs no certificate yet. | The signal is missing. | None (informational). |
+| `url.reputation.safe_browsing` | HIGH | Google Safe Browsing lists the exact URL (phishing, malware, unwanted software). Needs `PHISHLENS_SAFE_BROWSING_API_KEY`. | A confirmed listing by a major provider. | Rare; listings are occasionally stale after a site is cleaned. |
+| `url.reputation.urlscan` | HIGH | Earlier urlscan.io scans of the domain were judged malicious (search only; nothing is submitted). Needs `PHISHLENS_URLSCAN_API_KEY`. | Others have already seen this domain doing harm. | Shared hosting domains where one tenant was malicious. |
+| `url.reputation.virustotal` | HIGH with 2+ engines saying malicious, otherwise MEDIUM | VirusTotal's existing report for the URL (lookup only; nothing is submitted). Needs `PHISHLENS_VIRUSTOTAL_API_KEY`. | Independent scanners agree. | Single engines flag legitimate sites; that's why one engine is only MEDIUM. |

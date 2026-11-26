@@ -99,6 +99,23 @@ class RdapClient(Protocol):
         ...
 
 
+class ServiceUnavailableError(RuntimeError):
+    """An outside lookup (RDAP, certificate transparency, reputation) couldn't
+    give an answer. Checks report this as "unknown", never as clean."""
+
+
+class CtClient(Protocol):
+    async def first_certificate(self, domain: str) -> datetime | None:
+        """When the first certificate for the domain was issued, according to
+        certificate-transparency logs. None if no certificate is logged."""
+        ...
+
+
+class UnconfiguredCt:
+    async def first_certificate(self, domain: str) -> datetime | None:
+        raise ServiceNotConfiguredError("no certificate-transparency client is configured")
+
+
 class Clock(Protocol):
     def now(self) -> datetime:
         """Return the current time, timezone-aware, in UTC."""
