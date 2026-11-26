@@ -4,7 +4,6 @@ import asyncio
 from dataclasses import dataclass
 
 from phishlens.findings import CheckContext, Finding, Severity
-from phishlens.subjects import RawEmail, RawUrl
 
 
 @dataclass(frozen=True)
@@ -13,7 +12,7 @@ class StaticCheck:
 
     name: str
 
-    async def run(self, subject: RawEmail | RawUrl, ctx: CheckContext) -> list[Finding]:
+    async def run(self, subject: object, ctx: CheckContext) -> list[Finding]:
         return [
             Finding(
                 id=f"{self.name}.seen",
@@ -31,7 +30,7 @@ class CrashingCheck:
 
     name: str
 
-    async def run(self, subject: RawEmail | RawUrl, ctx: CheckContext) -> list[Finding]:
+    async def run(self, subject: object, ctx: CheckContext) -> list[Finding]:
         raise ValueError(f"could not parse {subject!r}")
 
 
@@ -39,6 +38,6 @@ class CrashingCheck:
 class HangingCheck:
     name: str
 
-    async def run(self, subject: RawEmail | RawUrl, ctx: CheckContext) -> list[Finding]:
+    async def run(self, subject: object, ctx: CheckContext) -> list[Finding]:
         await asyncio.sleep(60)
         return []

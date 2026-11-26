@@ -8,8 +8,9 @@ naming it in PHISHLENS_DISABLED_CHECKS (comma-separated), for example
 from collections.abc import Iterable
 from dataclasses import dataclass
 
+from phishlens.email.parse import ParsedEmail
 from phishlens.findings import Check
-from phishlens.subjects import RawEmail, RawUrl
+from phishlens.subjects import RawUrl
 
 
 class UnknownCheckError(ValueError):
@@ -18,7 +19,7 @@ class UnknownCheckError(ValueError):
 
 @dataclass(frozen=True, slots=True)
 class Registry:
-    email_checks: tuple[Check[RawEmail], ...] = ()
+    email_checks: tuple[Check[ParsedEmail], ...] = ()
     url_checks: tuple[Check[RawUrl], ...] = ()
 
     def __post_init__(self) -> None:

@@ -423,6 +423,7 @@ dependencies = [
     { name = "httpx" },
     { name = "idna" },
     { name = "publicsuffixlist" },
+    { name = "puremagic" },
     { name = "pydantic" },
     { name = "uvicorn" },
 ]
@@ -434,6 +435,7 @@ requires-dist = [
     { name = "httpx", specifier = ">=0.27" },
     { name = "idna", specifier = ">=3.7" },
     { name = "publicsuffixlist", specifier = ">=1.0" },
+    { name = "puremagic", specifier = ">=2.0" },
     { name = "pydantic", specifier = ">=2.9" },
     { name = "uvicorn", specifier = ">=0.32" },
 ]
@@ -481,6 +483,15 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/40/3b/25d372a359d0ed290d75f767c85cd58e87954cb493f0e20296859481a631/publicsuffixlist-1.1.2.20261126.tar.gz", hash = "sha256:ba6c3e8a6778aef676fe3cbc0c9613da7eb16319b79979ec8fbccd8c6408f5cc", size = 108541, upload-time = "2026-11-26T12:15:39.664Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/36/c0/55940b6f5b76601da5f6980c796c4d1e22cb5c98fb08f8900794ee2e8dd3/publicsuffixlist-1.1.2.20261126-py3-none-any.whl", hash = "sha256:7debcde51be54aa091531c037f33cfb9996fe86e05c08fefe2ee127e564f165d", size = 111266, upload-time = "2026-11-26T12:15:38.386Z" },
+]
+
+[[package]]
+name = "puremagic"
+version = "2.3.0"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/a7/8d/4d60110e23f445e2dc106340f9bd5f422bb6c540f4fb21086d3ee44b52ab/puremagic-2.3.0.tar.gz", hash = "sha256:b54e4a69dd37c50bacc879380f132382ab4e9a935529628c8975abcc73e10640", size = 1214491, upload-time = "2026-11-16T04:55:04.12Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/8c/40/72fcaa2f4b850da0207c111be7d2748a57a1c8e8ab149fdc1618323a0b87/puremagic-2.3.0-py3-none-any.whl", hash = "sha256:15ce035fe4c3f23e884a105d07448a5a81dd2e297985bdb636928ddf89bb3fe7", size = 73366, upload-time = "2026-11-16T04:55:02.784Z" },
 ]
 
 [[package]]

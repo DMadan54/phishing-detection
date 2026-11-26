@@ -7,6 +7,7 @@ the length of one request. Emails are sent as the raw body (not multipart),
 because multipart uploads over 1 MB are spooled to a temporary file on disk.
 """
 
+import asyncio
 import os
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
@@ -20,12 +21,13 @@ from pydantic import BaseModel, ConfigDict, Field
 
 from phishlens import __version__
 from phishlens.dnsbridge import CachingDns
+from phishlens.email.parse import parse_email
 from phishlens.findings import CheckContext, Finding
 from phishlens.limits import BodySizeLimitMiddleware
 from phishlens.registry import Registry, default_registry, parse_disabled
 from phishlens.runner import run_checks
 from phishlens.services import DnspythonResolver, SystemClock, UnconfiguredRdap
-from phishlens.subjects import RawEmail, RawUrl
+from phishlens.subjects import RawUrl
 
 MAX_EMAIL_BYTES = 10 * 1024 * 1024
 MAX_URL_CHARS = 2048
@@ -128,7 +130,9 @@ def create_app(registry: Registry | None = None, context: CheckContext | None = 
         if not raw.strip():
             raise HTTPException(HTTPStatus.UNPROCESSABLE_ENTITY, "The request body is empty.")
 
-        findings = await run_checks(checks.email_checks, RawEmail(raw), current_context())
+        # Parsing a large message is CPU work, so keep it off the event loop.
+        parsed = await asyncio.to_thread(parse_email, raw)
+        findings = await run_checks(checks.email_checks, parsed, current_context())
         return Report(
             kind="email", findings=findings, checks_run=[c.name for c in checks.email_checks]
         )
