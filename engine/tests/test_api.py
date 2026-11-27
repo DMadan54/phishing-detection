@@ -4,7 +4,9 @@ import httpx
 import pytest
 
 from phishlens.api import MAX_EMAIL_BYTES, MAX_URL_CHARS, create_app
-from phishlens.registry import Registry
+from phishlens.email.config import EmailConfig
+from phishlens.registry import Registry, default_registry
+from phishlens.services import Fetcher
 from tests.checks import StaticCheck
 from tests.fakes import make_context
 
@@ -142,4 +144,46 @@ async def test_oversized_url_body_is_413(client: httpx.AsyncClient) -> None:
 async def test_malformed_url_request_is_422(client: httpx.AsyncClient, body: bytes) -> None:
     headers = {"Content-Type": "application/json"}
     response = await client.post("/analyse/url", content=body, headers=headers)
+    assert response.status_code == 422
+
+
+# --- url, with the real URL checks -------------------------------------------
+
+
+def url_client(fetcher: Fetcher | None = None) -> httpx.AsyncClient:
+    context = make_context(fetcher=fetcher)
+    app = create_app(registry=default_registry(EmailConfig()), context=context)
+    return httpx.AsyncClient(transport=httpx.ASGITransport(app=app), base_url="http://testserver")
+
+
+async def test_url_route_runs_the_url_checks() -> None:
+    async with url_client() as client:
+        response = await client.post(
+            "/analyse/url",
+            json={"url": "https://paypal.com@login.paypa1.com/signin", "follow_redirects": False},
+        )
+    report = response.json()
+    ids = {f["id"] for f in report["findings"]}
+    assert {"url.userinfo.present", "url.lookalike.character_swap"} <= ids
+    assert "url.redirect" not in report["checks_run"]
+    assert "url.lexical" not in report["checks_run"]  # checks are named by part
+    assert "url.host" in report["checks_run"]
+
+
+async def test_url_route_follows_redirects_by_default() -> None:
+    from phishlens.net.safe_fetch import SafeFetcher
+    from tests.fakes import FakeConnector, FakeDns, redirect
+
+    dns = FakeDns().add("bit.ly", "A", "93.184.215.14").add("paypa1.com", "A", "93.184.215.14")
+    connector = FakeConnector({"https://bit.ly/x": redirect("https://paypa1.com/login")})
+    async with url_client(SafeFetcher(dns=dns, connector=connector)) as client:
+        response = await client.post("/analyse/url", json={"url": "https://bit.ly/x"})
+    report = response.json()
+    assert "url.redirect" in report["checks_run"]
+    assert "url.redirect.to_lookalike" in {f["id"] for f in report["findings"]}
+
+
+async def test_bad_follow_redirects_value_is_422(client: httpx.AsyncClient) -> None:
+    body = {"url": "https://example.com", "follow_redirects": "maybe"}
+    response = await client.post("/analyse/url", json=body)
     assert response.status_code == 422

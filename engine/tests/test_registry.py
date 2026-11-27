@@ -48,3 +48,4 @@ def test_parse_disabled(value: str | None, expected: frozenset[str]) -> None:
 def test_default_registry_lists_the_email_checks() -> None:
     names = default_registry().names
     assert {"email.spf", "email.dkim", "email.dmarc", "email.auth_results"} <= names
+    assert {"url.host", "url.lookalike", "url.redirect", "url.age", "url.ct"} <= names

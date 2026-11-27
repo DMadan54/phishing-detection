@@ -2,10 +2,15 @@
 
 Adding a check means adding it to default_registry(). Turning one off means
 naming it in PHISHLENS_DISABLED_CHECKS (comma-separated), for example
-"email.dkim,url.shortener".
+"email.dkim,url.reputation".
+
+Links inside emails get the URL checks that only read the link (lexical,
+lookalike, international names) plus reputation lookups. They are never
+fetched and their domains aren't looked up, because fetching a phishing
+link can tell the attacker that the message was read.
 """
 
-from collections.abc import Iterable
+from collections.abc import Iterable, Sequence
 from dataclasses import dataclass
 
 from phishlens.email.attachments import AttachmentCheck
@@ -22,7 +27,12 @@ from phishlens.email.language import LanguageCheck
 from phishlens.email.links import LinkCheck
 from phishlens.email.parse import ParsedEmail
 from phishlens.findings import Check
-from phishlens.subjects import RawUrl
+from phishlens.intel.reputation import ReputationSource
+from phishlens.url.domain_checks import IdnCheck, LookalikeCheck
+from phishlens.url.intel_checks import AgeCheck, CertificateCheck, ReputationCheck
+from phishlens.url.lexical import lexical_checks
+from phishlens.url.parse import ParsedUrl
+from phishlens.url.redirects import RedirectCheck
 
 
 class UnknownCheckError(ValueError):
@@ -32,7 +42,7 @@ class UnknownCheckError(ValueError):
 @dataclass(frozen=True, slots=True)
 class Registry:
     email_checks: tuple[Check[ParsedEmail], ...] = ()
-    url_checks: tuple[Check[RawUrl], ...] = ()
+    url_checks: tuple[Check[ParsedUrl], ...] = ()
 
     def __post_init__(self) -> None:
         names = self._all_names()
@@ -70,8 +80,20 @@ def parse_disabled(value: str | None) -> frozenset[str]:
     return frozenset(name.strip() for name in value.split(",") if name.strip())
 
 
-def default_registry(email_config: EmailConfig | None = None) -> Registry:
-    """Every check PhishLens runs, in the order findings are reported."""
+def link_checks(reputation: Sequence[ReputationSource] = ()) -> tuple[Check[ParsedUrl], ...]:
+    """The URL checks run on every link in an email: nothing that fetches it."""
+    return (*lexical_checks(), LookalikeCheck(), IdnCheck(), ReputationCheck(tuple(reputation)))
+
+
+def default_registry(
+    email_config: EmailConfig | None = None,
+    reputation: Sequence[ReputationSource] = (),
+) -> Registry:
+    """Every check PhishLens runs, in the order findings are reported.
+
+    reputation: the configured third-party sources (see
+    intel.reputation.configured_sources); none unless API keys are set.
+    """
     config = email_config or EmailConfig.from_env()
     return Registry(
         email_checks=(
@@ -83,9 +105,17 @@ def default_registry(email_config: EmailConfig | None = None) -> Registry:
             FromCheck(),
             HeaderConsistencyCheck(),
             DateCheck(config),
-            LinkCheck(),
+            LinkCheck(link_checks(reputation)),
             AttachmentCheck(),
             LanguageCheck(),
         ),
-        url_checks=(),
+        url_checks=(
+            *lexical_checks(),
+            LookalikeCheck(),
+            IdnCheck(),
+            AgeCheck(),
+            CertificateCheck(),
+            ReputationCheck(tuple(reputation)),
+            RedirectCheck(),
+        ),
     )

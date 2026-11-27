@@ -71,7 +71,16 @@ curl -X POST -H "Content-Type: message/rfc822" \
 
 curl -X POST -H "Content-Type: application/json" \
      -d '{"url": "https://example.com/login"}' http://127.0.0.1:8000/analyse/url
+
+# Only read the URL, without following its redirects (nothing is fetched)
+curl -X POST -H "Content-Type: application/json" \
+     -d '{"url": "https://paypal.com@login.paypa1.com/", "follow_redirects": false}' \
+     http://127.0.0.1:8000/analyse/url
 ```
+
+Following redirects fetches the URL through the SSRF-guarded fetcher (it
+refuses every internal address), which still contacts the site. Links inside
+emails are never fetched.
 
 Limits: emails up to 10 MiB and URLs up to 2048 characters (larger gets
 `413`); a malformed request gets `422`, and an email sent with the wrong

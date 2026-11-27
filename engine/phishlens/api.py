@@ -5,6 +5,10 @@ Run it with:  uv run uvicorn --factory phishlens.api:create_app --reload
 Nothing here stores what it receives: the email or URL lives in memory for
 the length of one request. Emails are sent as the raw body (not multipart),
 because multipart uploads over 1 MB are spooled to a temporary file on disk.
+
+/analyse/url follows the URL's redirects (through the SSRF-guarded fetcher)
+unless the request says "follow_redirects": false. Links inside emails are
+never fetched.
 """
 
 import asyncio
@@ -23,11 +27,15 @@ from phishlens import __version__
 from phishlens.dnsbridge import CachingDns
 from phishlens.email.parse import parse_email
 from phishlens.findings import CheckContext, Finding
+from phishlens.intel.ct import CrtShClient
+from phishlens.intel.rdap import HttpRdapClient
+from phishlens.intel.reputation import configured_sources
 from phishlens.limits import BodySizeLimitMiddleware
+from phishlens.net.safe_fetch import SafeFetcher
 from phishlens.registry import Registry, default_registry, parse_disabled
 from phishlens.runner import run_checks
-from phishlens.services import DnspythonResolver, SystemClock, UnconfiguredRdap
-from phishlens.subjects import RawUrl
+from phishlens.services import DnspythonResolver, SystemClock
+from phishlens.url.parse import parse_url
 
 MAX_EMAIL_BYTES = 10 * 1024 * 1024
 MAX_URL_CHARS = 2048
@@ -57,6 +65,9 @@ class _Frozen(BaseModel):
 
 class UrlRequest(_Frozen):
     url: str = Field(min_length=1)
+    # Following redirects fetches the URL (safely, but it does contact the
+    # site, which an attacker can notice). Turn it off to only read the URL.
+    follow_redirects: bool = True
 
 
 class Report(_Frozen):
@@ -78,28 +89,44 @@ class Health(_Frozen):
 
 @dataclass
 class _State:
-    context: CheckContext | None
+    context: CheckContext
+
+
+def real_context(http: httpx.AsyncClient) -> CheckContext:
+    """The production services. http is only for fixed API hosts (RDAP,
+    crt.sh, reputation); user-supplied URLs go through SafeFetcher."""
+    clock = SystemClock()
+    resolver = DnspythonResolver()
+    return CheckContext(
+        dns=resolver,
+        rdap=HttpRdapClient(http, clock),
+        http=http,
+        clock=clock,
+        fetcher=SafeFetcher(dns=resolver),
+        ct=CrtShClient(http, clock),
+    )
 
 
 def create_app(registry: Registry | None = None, context: CheckContext | None = None) -> FastAPI:
     """Build the app. Tests pass their own registry and a context of fakes."""
+    owned_http: httpx.AsyncClient | None = None
+    if context is None:
+        owned_http = httpx.AsyncClient(timeout=10.0, follow_redirects=False)
+        context = real_context(owned_http)
     if registry is None:
         disabled = parse_disabled(os.environ.get("PHISHLENS_DISABLED_CHECKS"))
-        registry = default_registry().without(disabled)
+        sources = configured_sources(context.http, context.clock)
+        registry = default_registry(reputation=sources).without(disabled)
     checks = registry
     state = _State(context=context)
 
     @asynccontextmanager
     async def lifespan(app: FastAPI) -> AsyncIterator[None]:
-        if state.context is not None:
+        try:
             yield
-            return
-        async with httpx.AsyncClient(timeout=10.0, follow_redirects=False) as http:
-            state.context = CheckContext(
-                dns=DnspythonResolver(), rdap=UnconfiguredRdap(), http=http, clock=SystemClock()
-            )
-            yield
-            state.context = None
+        finally:
+            if owned_http is not None:
+                await owned_http.aclose()
 
     app = FastAPI(title="PhishLens", version=__version__, lifespan=lifespan)
     app.add_middleware(
@@ -110,8 +137,6 @@ def create_app(registry: Registry | None = None, context: CheckContext | None = 
 
     def current_context() -> CheckContext:
         """The context for one request: shared services plus a fresh DNS cache."""
-        if state.context is None:
-            raise RuntimeError("the app was started without a check context")
         return replace(state.context, dns=CachingDns(state.context.dns))
 
     @app.get("/health")
@@ -144,7 +169,10 @@ def create_app(registry: Registry | None = None, context: CheckContext | None = 
                 HTTPStatus.REQUEST_ENTITY_TOO_LARGE,
                 f"The URL is longer than {MAX_URL_CHARS} characters.",
             )
-        findings = await run_checks(checks.url_checks, RawUrl(body.url), current_context())
-        return Report(kind="url", findings=findings, checks_run=[c.name for c in checks.url_checks])
+        url_checks = [
+            c for c in checks.url_checks if body.follow_redirects or c.name != "url.redirect"
+        ]
+        findings = await run_checks(url_checks, parse_url(body.url), current_context())
+        return Report(kind="url", findings=findings, checks_run=[c.name for c in url_checks])
 
     return app
