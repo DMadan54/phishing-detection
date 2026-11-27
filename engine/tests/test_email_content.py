@@ -1,14 +1,13 @@
 """Link, attachment and language checks."""
 
 import io
-import ipaddress
 import zipfile
 
 import pytest
 
 from phishlens.email.attachments import AttachmentCheck, OleMacroScanner
 from phishlens.email.language import LanguageCheck
-from phishlens.email.links import LinkCheck, ip_in_host
+from phishlens.email.links import MAX_LINKS, LinkCheck
 from phishlens.email.parse import ParsedEmail, parse_email
 from phishlens.findings import Check, Severity
 from tests.email_checks import findings_for, ids_for
@@ -35,9 +34,9 @@ EXPECTED: dict[str, set[str]] = {
     "legit_subdomain_relaxed": set(),
     "link_text_mismatch": {"email.links.text_mismatch"},
     "risky_links": {
-        "email.links.ip_host",
-        "email.links.shortener",
-        "email.links.dangerous_scheme",
+        "url.host.ip_literal",
+        "url.host.shortener",
+        "url.scheme.dangerous",
     },
     "double_extension": {
         "email.attachments.double_extension",
@@ -52,16 +51,24 @@ EXPECTED: dict[str, set[str]] = {
     "html_smuggling": {"email.attachments.html"},
     "type_mismatch": {"email.attachments.type_mismatch"},
     "macro_document": {"email.attachments.macros"},
-    "brand_spoof_dmarc_fail": {"email.language.urgency", "email.language.credential_request"},
+    "brand_spoof_dmarc_fail": {
+        "url.brand.in_path",
+        "email.language.urgency",
+        "email.language.credential_request",
+    },
+    # The sender is a lookalike, and so is the domain its link points at.
+    "lookalike_sender": {"url.lookalike.character_swap"},
     "reply_to_hijack": {"email.language.urgency"},
     "malformed": set(),
 }
 
 ALL_IDS = {
     "email.links.text_mismatch",
-    "email.links.ip_host",
-    "email.links.shortener",
-    "email.links.dangerous_scheme",
+    "url.host.ip_literal",
+    "url.host.shortener",
+    "url.scheme.dangerous",
+    "url.lookalike.character_swap",
+    "url.brand.in_path",
     "email.attachments.executable",
     "email.attachments.double_extension",
     "email.attachments.bidi_name",
@@ -88,27 +95,6 @@ def test_every_id_has_a_positive_and_a_negative() -> None:
 # --- links -------------------------------------------------------------------
 
 
-@pytest.mark.parametrize(
-    ("host", "expected"),
-    [
-        ("198.51.100.77", "198.51.100.77"),
-        ("198.51.100.77.", "198.51.100.77"),
-        ("3325256781", "198.51.100.77"),
-        ("0xc633644d", "198.51.100.77"),
-        ("0306.0063.0144.0115", "198.51.100.77"),
-        ("198.51.25677", "198.51.100.77"),
-        ("2001:db8::1", "2001:db8::1"),
-        ("example.com", None),
-        ("1.2.3.4.5", None),
-        ("999.1.1.1", None),
-        ("08.1.1.1", None),
-    ],
-)
-def test_ip_in_host(host: str, expected: str | None) -> None:
-    result = ip_in_host(host)
-    assert result == (ipaddress.ip_address(expected) if expected else None)
-
-
 def html(*anchors: str) -> ParsedEmail:
     body = "".join(anchors)
     return parse_email(
@@ -125,12 +111,15 @@ def html(*anchors: str) -> ParsedEmail:
         ('<a href="mailto:help@shop.example">help@shop.example</a>', set()),
         (
             '<a href="http://198.51.100.1/">https://paypal.com</a>',
-            {"email.links.text_mismatch", "email.links.ip_host"},
+            {"email.links.text_mismatch", "url.host.ip_literal"},
         ),
-        ('<a href="https://paypal.com.evil.test/">paypal.com</a>', {"email.links.text_mismatch"}),
-        ('<a href="java\tscript:alert(1)">Open</a>', {"email.links.dangerous_scheme"}),
-        ('<a href="https://tinyurl.com/abc">More</a>', {"email.links.shortener"}),
-        ('<a href="https://www.bit.ly/abc">More</a>', {"email.links.shortener"}),
+        (
+            '<a href="https://paypal.com.evil.test/">paypal.com</a>',
+            {"email.links.text_mismatch", "url.brand.in_subdomain"},
+        ),
+        ('<a href="java\tscript:alert(1)">Open</a>', {"url.scheme.dangerous"}),
+        ('<a href="https://tinyurl.com/abc">More</a>', {"url.host.shortener"}),
+        ('<a href="https://www.bit.ly/abc">More</a>', {"url.host.shortener"}),
         ('<a href="https://notbit.ly/abc">More</a>', set()),
     ],
 )
@@ -140,7 +129,28 @@ async def test_link_edge_cases(anchor: str, expected: set[str]) -> None:
 
 async def test_plain_text_links_are_checked_too() -> None:
     msg = parse_email(b"From: a@shop.example\r\n\r\nGo to http://198.51.100.9/login now\r\n")
-    assert await ids_for(msg, [LinkCheck()]) == {"email.links.ip_host"}
+    assert await ids_for(msg, [LinkCheck()]) == {"url.host.ip_literal"}
+
+
+async def test_disguised_ip_link_is_read_like_a_browser() -> None:
+    (finding,) = await findings_for(
+        html('<a href="http://3325256781/login">Sign in</a>'), [LinkCheck()]
+    )
+    assert finding.id == "url.host.ip_literal" and "198.51.100.77" in finding.explanation
+
+
+async def test_same_problem_on_several_links_is_one_finding() -> None:
+    anchors = [f'<a href="http://198.51.100.{i}/">Link {i}</a>' for i in range(1, 8)]
+    (finding,) = await findings_for(html(*anchors), [LinkCheck()])
+    assert "(7 such links in total.)" in finding.explanation
+    assert sum(1 for e in finding.evidence if e.kind == "url") == 5
+    assert any(getattr(e, "excerpt", "") == "link text: Link 1" for e in finding.evidence)
+
+
+async def test_link_count_is_capped() -> None:
+    anchors = [f'<a href="http://198.51.100.{i}/">x</a>' for i in range(MAX_LINKS + 10)]
+    (finding,) = await findings_for(html(*anchors), [LinkCheck()])
+    assert f"({MAX_LINKS} such links in total.)" in finding.explanation
 
 
 # --- attachments -------------------------------------------------------------

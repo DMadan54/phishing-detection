@@ -45,12 +45,13 @@ drop one step when the message has a `List-Id` header and a valid ARC chain.
 
 ## Email: content
 
+Every link in an email is also run through the URL checks that only read the link (lexical, lookalike and international-name checks, and reputation if configured). Those findings keep their `url.*` ids, merged per id with up to five links as evidence. Links are never fetched, because fetching a phishing link can tell the attacker the message was read.
+
+Retired ids, replaced by the URL checks: `email.links.ip_host` → `url.host.ip_literal`, `email.links.shortener` → `url.host.shortener`, `email.links.dangerous_scheme` → `url.scheme.dangerous`.
+
 | Finding id | Severity | What it means | Why it matters | Known false positives |
 |------------|----------|---------------|----------------|-----------------------|
 | `email.links.text_mismatch` | HIGH | An HTML link's visible text is a URL or domain owned by someone other than the link's real destination. | You read a trusted address and land somewhere else. | Marketing click-tracking: legitimate services routinely show `www.brand.com` while linking through their tracking domain. |
-| `email.links.ip_host` | MEDIUM | A link's host is an IP address, including the decimal, hex and octal spellings browsers accept (`http://3325256781/`). | No domain name to recognise or hold anyone to account; disguised spellings hide that it's an IP at all. | Internal tools and device admin pages linked by IP in workplace mail. |
-| `email.links.shortener` | LOW | A link goes through a host in `shared/shorteners.json`. | The real destination is hidden. | Very common in social media and marketing mail. |
-| `email.links.dangerous_scheme` | HIGH | A `javascript:`, `data:`, `vbscript:` or `file:` link (tabs and newlines inside the scheme are ignored, as browsers do). | Runs script or opens embedded content instead of a website. | Practically none in email. |
 | `email.attachments.executable` | HIGH | The file name ends in a program or script extension, or the bytes are an executable (MZ, ELF or Mach-O header). Trailing dots and spaces are ignored, as Windows does. | Runs code when opened. | Software vendors and IT departments sending installers; developers sharing scripts. |
 | `email.attachments.double_extension` | CRITICAL | A document or image extension followed by a program extension (`invoice.pdf.exe`). | Windows hides the last extension, so only the fake one shows. | Almost none. |
 | `email.attachments.bidi_name` | CRITICAL | The file name contains a text-direction control character (for example U+202E RIGHT-TO-LEFT OVERRIDE). | `invoice<RLO>fdp.exe` displays as `invoiceexe.pdf`. | Almost none; right-to-left languages don't need control characters in file names. |
@@ -74,7 +75,7 @@ These read only the URL text, parsed with the WHATWG URL Standard (the rules bro
 | `url.host.deep_subdomains` | LOW | More than 4 labels in front of the registrable domain. | Pushes the real domain out of view. | CDNs and some cloud services use deep names. |
 | `url.host.long` | LOW | Host longer than 60 characters. | Hides the part that matters. | Cloud storage and CDN hostnames. |
 | `url.host.high_entropy` | LOW | The registrable label is 12+ characters with 3.5+ bits per character of Shannon entropy. | Looks machine-generated (domain-generation algorithms). | Hash-like names of some legitimate services. |
-| `url.host.shortener` | LOW | A host from `shared/shorteners.json`. | Hides the destination. | Very common legitimately. Replaces `email.links.shortener`. |
+| `url.host.shortener` | LOW | A host from `shared/shorteners.json`. | Hides the destination. | Very common legitimately. |
 | `url.userinfo.present` | HIGH if the part before `@` looks like a site or names a brand, otherwise MEDIUM | The URL has `user@` or `user:pass@` before the host. | People read `paypal.com@evil.example` as PayPal; the browser goes to `evil.example`. | Rare in links sent to people; some FTP and internal links. |
 | `url.brand.in_subdomain` | HIGH | A brand keyword appears in the subdomain of a domain the brand doesn't own (`login.microsoft.com.evil.example`). | Only the end of a name says who owns it; the start is free for anyone to write. | Partners and resellers with brand names in their subdomains. |
 | `url.brand.in_path` | MEDIUM with a sign-in word in the path, otherwise LOW | A brand keyword appears in the path on someone else's domain. | Fake sign-in pages are often at `/paypal/login`. | News, reviews and support forums that mention brands. |
@@ -119,7 +120,7 @@ These ask outside services about the domain, never the site itself. Brand-owned 
 | `url.age.new` | HIGH under 7 days, MEDIUM under 30 days | RDAP says the registrable domain was registered recently ("Registered 3 days ago"). | Phishing domains are registered just before use and dropped within days. | New businesses, campaigns and product launches. |
 | `url.age.unknown` | INFO | No RDAP server for the TLD (for example .de, .io and .co have none in IANA's bootstrap file), the registry didn't answer, or it gave no registration date. | The age signal is missing; nothing is assumed. | None (informational). |
 | `url.ct.first_seen_recent` | MEDIUM | The domain's first TLS certificate in the certificate-transparency logs (via crt.sh) is under 7 days old. | That's usually when the site went live. | New sites of any kind. |
-| `url.ct.unknown` | INFO | crt.sh couldn't be searched (timeout, rate limit, too much history to read) or logs no certificate yet. | The signal is missing. | None (informational). |
+| `url.ct.unknown` | INFO | crt.sh couldn't be searched (timeout, rate limit, too much history to read) or logs no certificate yet. | The signal is missing. | Common in practice: crt.sh is a free service that is often slow or overloaded. |
 | `url.reputation.safe_browsing` | HIGH | Google Safe Browsing lists the exact URL (phishing, malware, unwanted software). Needs `PHISHLENS_SAFE_BROWSING_API_KEY`. | A confirmed listing by a major provider. | Rare; listings are occasionally stale after a site is cleaned. |
 | `url.reputation.urlscan` | HIGH | Earlier urlscan.io scans of the domain were judged malicious (search only; nothing is submitted). Needs `PHISHLENS_URLSCAN_API_KEY`. | Others have already seen this domain doing harm. | Shared hosting domains where one tenant was malicious. |
 | `url.reputation.virustotal` | HIGH with 2+ engines saying malicious, otherwise MEDIUM | VirusTotal's existing report for the URL (lookup only; nothing is submitted). Needs `PHISHLENS_VIRUSTOTAL_API_KEY`. | Independent scanners agree. | Single engines flag legitimate sites; that's why one engine is only MEDIUM. |

@@ -1,31 +1,44 @@
 """Links in the message body.
 
-- Text that shows one domain while the link goes to another is the oldest
-  phishing trick there is: you read "www.paypal.com", you land on
-  evil.example.
-- A link to a bare IP address skips the domain system entirely, so there's
-  no name to recognise and nothing registered to anyone. Browsers also
-  accept odd spellings of IPs, such as http://3325256781/ (one decimal
-  number), which hide that it's an IP at all.
-- Shorteners hide the destination (supporting evidence only).
-- javascript:, data:, vbscript: and file: links run code or open content
-  directly instead of going to a website.
+Two kinds of finding come from here:
 
-Only the URL text is examined here; nothing is ever fetched.
+- email.links.text_mismatch, which only makes sense in an email: link text
+  that shows one domain while the link goes to another ("www.paypal.com"
+  pointing at evil.example), the oldest phishing trick there is.
+- Every URL check that only reads a link (phishlens.url: lexical checks,
+  lookalikes, international names, and reputation if configured), run on
+  each distinct link. Those findings keep their own url.* ids, so a lookalike
+  domain is reported the same way whether it was pasted or found in an email.
+  Findings with the same id are merged, with up to five links as evidence.
+
+Links are parsed with the same browser rules as pasted URLs. They are never
+fetched: following a phishing link can tell the attacker that the message
+was opened.
 """
 
-import ipaddress
+import asyncio
 import re
-from dataclasses import dataclass
-from urllib.parse import SplitResult, urlsplit
+from collections.abc import Sequence
+from dataclasses import dataclass, field
 
-from phishlens.brands import load_shorteners
-from phishlens.domains import as_ip, normalise_domain, same_owner
+from phishlens.domains import normalise_domain, same_owner
 from phishlens.email.parse import Link, ParsedEmail
-from phishlens.findings import BodyEvidence, CheckContext, Finding, Severity, UrlEvidence
+from phishlens.findings import (
+    BodyEvidence,
+    Check,
+    CheckContext,
+    Evidence,
+    Finding,
+    Severity,
+    UrlEvidence,
+)
+from phishlens.runner import run_checks
+from phishlens.url.domain_checks import IdnCheck, LookalikeCheck
+from phishlens.url.lexical import lexical_checks
+from phishlens.url.parse import ParsedUrl, parse_url
 
 MAX_EXAMPLES = 5
-DANGEROUS_SCHEMES = frozenset({"javascript", "data", "vbscript", "file"})
+MAX_LINKS = 20  # distinct links checked per message; the rest add nothing new
 
 # Link text that is, as a whole, a URL or a bare domain.
 _DOMAIN_TEXT = re.compile(
@@ -34,101 +47,50 @@ _DOMAIN_TEXT = re.compile(
 )
 
 
-@dataclass(frozen=True, slots=True)
-class _Url:
-    link: Link
-    parts: SplitResult | None
-    scheme: str
-    host: str | None
-
-
-def _clean(href: str) -> str:
-    """Strip what browsers ignore: surrounding whitespace and control
-    characters, and tabs or newlines anywhere ("java\tscript:" still runs)."""
-    return re.sub(r"[\t\r\n]", "", href).strip("\x00\x01\x02\x03\x04\x05\x06\x07\x08 \x0b\x0c")
-
-
-def _parse(link: Link) -> _Url:
-    href = _clean(link.href)
-    if href.lower().startswith("www."):
-        href = "http://" + href
-    try:
-        parts = urlsplit(href)
-        host = parts.hostname
-    except ValueError:
-        return _Url(link, None, "", None)
-    return _Url(link, parts, parts.scheme.lower(), host.rstrip(".") if host else None)
-
-
-def ip_in_host(host: str) -> ipaddress.IPv4Address | ipaddress.IPv6Address | None:
-    """The IP a host names, including the forms browsers accept for IPv4:
-    a single number (3325256781), hex (0xc6336457) and octal parts (0306.0063...)."""
-    direct = as_ip(host)
-    if direct:
-        return direct
-    parts = host.split(".")
-    if parts and parts[-1] == "":
-        parts.pop()
-    if not 1 <= len(parts) <= 4:
-        return None
-    numbers = []
-    for part in parts:
-        try:
-            if part.lower().startswith("0x"):
-                numbers.append(int(part, 16))
-            elif len(part) > 1 and part.startswith("0"):
-                numbers.append(int(part, 8))
-            else:
-                numbers.append(int(part, 10))
-        except ValueError:
-            return None
-    *leading, last = numbers
-    if any(n > 255 for n in leading) or last >= 256 ** (5 - len(numbers)):
-        return None
-    value = last
-    for i, n in enumerate(leading):
-        value += n << (8 * (3 - i))
-    return ipaddress.IPv4Address(value)
+def reading_checks() -> tuple[Check[ParsedUrl], ...]:
+    """URL checks that need nothing but the link text."""
+    return (*lexical_checks(), LookalikeCheck(), IdnCheck())
 
 
 @dataclass(frozen=True)
 class LinkCheck:
+    url_checks: Sequence[Check[ParsedUrl]] = field(default_factory=reading_checks)
     name: str = "email.links"
 
     async def run(self, msg: ParsedEmail, ctx: CheckContext) -> list[Finding]:
-        urls = [_parse(link) for link in msg.links]
-        findings = [
-            *self._text_mismatch(urls),
-            *self._ip_hosts(urls),
-            *self._shorteners(urls),
-            *self._dangerous(urls),
-        ]
-        return findings
+        links: dict[str, Link] = {}
+        for link in msg.links:
+            links.setdefault(link.href.strip(), link)
+        distinct = list(links.items())[:MAX_LINKS]
+        parsed = [(parse_url(href), link) for href, link in distinct]
+        return [*self._text_mismatch(parsed), *await self._url_findings(parsed, ctx)]
 
-    def _text_mismatch(self, urls: list[_Url]) -> list[Finding]:
+    def _text_mismatch(self, links: list[tuple[ParsedUrl, Link]]) -> list[Finding]:
         examples: list[tuple[str, str]] = []
-        for url in urls:
-            if url.link.source != "html" or not url.host:
+        for url, link in links:
+            if link.source != "html" or not url.host:
                 continue
-            match = _DOMAIN_TEXT.match(url.link.text.strip())
+            match = _DOMAIN_TEXT.match(link.text.strip())
             if not match:
                 continue
             shown = normalise_domain(match.group("host"))
-            real = normalise_domain(url.host) or url.host
-            if shown and not same_owner(shown, real):
-                examples.append((url.link.text.strip(), real))
+            if shown and not same_owner(shown, url.host):
+                examples.append((link.text.strip(), url.host))
         if not examples:
             return []
         shown, real = examples[0]
         return [
-            self._finding(
-                "text_mismatch",
-                Severity.HIGH,
-                "A link shows one address but goes to another",
-                f"A link reads '{shown}' but actually goes to {real}. Showing a trusted "
-                "address while linking somewhere else is a classic phishing trick."
-                + self._more(len(examples)),
-                tuple(
+            Finding(
+                id=f"{self.name}.text_mismatch",
+                check=self.name,
+                severity=Severity.HIGH,
+                title="A link shows one address but goes to another",
+                explanation=(
+                    f"A link reads '{shown}' but actually goes to {real}. Showing a trusted "
+                    "address while linking somewhere else is a classic phishing trick."
+                    + _more(len(examples))
+                ),
+                evidence=tuple(
                     e
                     for text, host in examples[:MAX_EXAMPLES]
                     for e in (BodyEvidence(excerpt=text), UrlEvidence(component="host", value=host))
@@ -136,84 +98,36 @@ class LinkCheck:
             )
         ]
 
-    def _ip_hosts(self, urls: list[_Url]) -> list[Finding]:
-        examples = [(u, ip) for u in urls if u.host for ip in [ip_in_host(u.host)] if ip]
-        if not examples:
-            return []
-        url, ip = examples[0]
-        disguised = url.host != str(ip)
-        return [
-            self._finding(
-                "ip_host",
-                Severity.MEDIUM,
-                "A link goes to a bare IP address",
-                f"A link goes to {url.host}"
-                + (f" (which browsers read as the IP address {ip})" if disguised else "")
-                + ". Real organisations link to their domain names; a bare address hides who "
-                "runs the site." + self._more(len(examples)),
-                tuple(
-                    UrlEvidence(component="host", value=u.host or "")
-                    for u, _ in examples[:MAX_EXAMPLES]
-                ),
-            )
-        ]
-
-    def _shorteners(self, urls: list[_Url]) -> list[Finding]:
-        shorteners = load_shorteners()
-        examples = [u for u in urls if u.host and u.host.removeprefix("www.") in shorteners]
-        if not examples:
-            return []
-        return [
-            self._finding(
-                "shortener",
-                Severity.LOW,
-                "A link uses a URL shortener",
-                f"A link goes through {examples[0].host}, a URL shortener, which hides where "
-                "it really leads. Plenty of genuine mail uses shorteners, so this is supporting "
-                "evidence only." + self._more(len(examples)),
-                tuple(
-                    UrlEvidence(component="host", value=u.host or "")
-                    for u in examples[:MAX_EXAMPLES]
-                ),
-            )
-        ]
-
-    def _dangerous(self, urls: list[_Url]) -> list[Finding]:
-        examples = [u for u in urls if u.scheme in DANGEROUS_SCHEMES]
-        if not examples:
-            return []
-        schemes = ", ".join(dict.fromkeys(f"{u.scheme}:" for u in examples))
-        return [
-            self._finding(
-                "dangerous_scheme",
-                Severity.HIGH,
-                "A link runs code or opens content directly",
-                f"The message contains {schemes} links. Instead of opening a website, these run "
-                "script or open content embedded in the link itself, which legitimate email "
-                "has no reason to do." + self._more(len(examples)),
-                tuple(
-                    UrlEvidence(component="scheme", value=u.scheme) for u in examples[:MAX_EXAMPLES]
-                ),
-            )
-        ]
-
-    @staticmethod
-    def _more(count: int) -> str:
-        return f" ({count} such links in total.)" if count > 1 else ""
-
-    def _finding(
-        self,
-        what: str,
-        severity: Severity,
-        title: str,
-        explanation: str,
-        proof: tuple[BodyEvidence | UrlEvidence, ...],
-    ) -> Finding:
-        return Finding(
-            id=f"{self.name}.{what}",
-            check=self.name,
-            severity=severity,
-            title=title,
-            explanation=explanation,
-            evidence=proof,
+    async def _url_findings(
+        self, links: list[tuple[ParsedUrl, Link]], ctx: CheckContext
+    ) -> list[Finding]:
+        per_link = await asyncio.gather(
+            *(run_checks(self.url_checks, url, ctx) for url, _ in links)
         )
+        grouped: dict[str, list[tuple[Finding, Link]]] = {}
+        for (_, link), findings in zip(links, per_link, strict=True):
+            for finding in findings:
+                grouped.setdefault(finding.id, []).append((finding, link))
+        return [_merge(items) for items in grouped.values()]
+
+
+def _more(count: int) -> str:
+    return f" ({count} such links in total.)" if count > 1 else ""
+
+
+def _merge(items: list[tuple[Finding, Link]]) -> Finding:
+    """One finding per id: the first link's explanation, every link's evidence."""
+    first, _ = items[0]
+    evidence: list[Evidence] = []
+    for finding, link in items[:MAX_EXAMPLES]:
+        if link.text and link.text != link.href:
+            evidence.append(BodyEvidence(excerpt=f"link text: {link.text}"))
+        evidence.extend(finding.evidence)
+    worst = max((f.severity for f, _ in items), key=list(Severity).index)
+    return first.model_copy(
+        update={
+            "severity": worst,
+            "explanation": first.explanation + _more(len(items)),
+            "evidence": tuple(evidence),
+        }
+    )
